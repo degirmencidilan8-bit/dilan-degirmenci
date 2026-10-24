@@ -1,0 +1,407 @@
+@import "tailwindcss";
+
+:root {
+  --color-ink: #0c0c0b;
+  --color-ink-soft: #141412;
+  --color-paper: #f4f1ea;
+  --color-paper-dim: #b6b2a6;
+  --color-line: rgba(244, 241, 234, 0.14);
+  --color-line-strong: rgba(244, 241, 234, 0.28);
+  /* The one accent colour, introduced by the homepage opening (FlowIntro)
+     and reused wherever the site needs a single sharp mark — a section
+     number, a highlighted word. Never a second accent alongside it. */
+  --color-accent: #d2001c;
+
+  /* Three faces, all sans. Archivo sets NAMES and NUMBERS; Inter sets
+     longer SENTENCES; JetBrains Mono sets navigation, captions and labels. */
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-paper: var(--color-paper);
+  --color-paper-dim: var(--color-paper-dim);
+  --color-line: var(--color-line);
+  --color-line-strong: var(--color-line-strong);
+  --color-accent: var(--color-accent);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Editorial label / eyebrow text used for nav, meta, captions */
+.label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.label-lg {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Quieter still — the persistent chrome (nav, status bar) reads as a
+   whisper, not a bar: small, tracked wide, never the loudest thing on the
+   page. */
+.label-sm {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Every large name on the site is set through this one class. Archivo is
+   variable on both width and weight, so a project overrides --dw / --dg
+   inline and gets its own tone out of the same typeface — thirteen voices,
+   one family. Defaults are the house setting: narrow and heavy. */
+.display {
+  font-family: var(--font-display);
+  font-variation-settings:
+    "wdth" var(--dw, 68),
+    "wght" var(--dg, 800);
+  letter-spacing: var(--dt, -0.03em);
+}
+
+/* The one secondary typographic device: hollow type. Reserved for index
+   numerals and the title standing behind the wall — never for a headline
+   you are meant to read quickly. */
+.display-outline {
+  color: transparent;
+  -webkit-text-stroke: var(--stroke, 1.5px) var(--stroke-color, var(--color-paper));
+}
+
+/* Filling a hollow numeral, for the row the pointer is on. The stroke
+   stays, so the glyph thickens slightly as it fills. */
+.display-outline.is-filled {
+  color: var(--color-paper);
+}
+
+.hairline {
+  border-color: var(--color-line);
+}
+
+/* Placeholder media block: stand-in for photography / video until real
+   assets are dropped in. The diagonal hatch signals "placeholder" rather
+   than trying to look like a finished image. */
+.placeholder-media {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-ink-soft);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(244, 241, 234, 0.05) 0px,
+    rgba(244, 241, 234, 0.05) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+
+.placeholder-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--color-line);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* The site's skin: one static film-grain layer over everything. Pure
+   CSS/SVG noise — no image asset, and deliberately NOT animated (moving
+   noise repaints every frame and reads cheap). No mix-blend-mode either:
+   a blended full-screen layer forces the whole viewport to recomposite
+   on every frame of the band's motion, which this project has already
+   been bitten by once. Plain opacity is free by comparison. */
+.grain-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.042;
+  background-repeat: repeat;
+  background-size: 140px 140px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* The one-line note in a project page's top-left corner, beside a band
+   that is vertically centred. On a tall viewport the band starts well
+   below the note and it can have its full measure. On a short one the band
+   rises to meet it, and the only space left is the strip to the left of
+   the widest piece the wall can draw — a 16:9 cover, capped at 60% of the
+   viewport, so it always begins at 0.2vw. The note is held inside that
+   strip. No scrim, no fade, no type over a photograph. Below 1000px the
+   strip is too narrow to set a sentence in at all, so the note steps
+   aside; the Work index carries the full three-part text. */
+.corner-col {
+  max-width: 15rem;
+}
+
+/* Wide AND short only. This formula exists to keep the column inside the
+   strip left of a 16:9 piece, which is a problem a wide screen has. On a
+   375px phone 20vw - 3.5rem comes to 19px and the whole column collapses
+   into a ribbon one character wide — which is exactly what it did until
+   the min-width was added. */
+@media (max-height: 919px) and (min-width: 1000px) {
+  .corner-col {
+    max-width: min(15rem, calc(20vw - 3.5rem));
+  }
+}
+
+/* On a phone the band is centred in a narrow screen and there is no margin
+   to put a rail in — it lands straight on the photograph. Title and frame
+   count stay, because they say where you are; the specification steps off
+   and the Work index carries it. */
+@media (max-width: 767px) {
+  .corner-rail,
+  .corner-slate {
+    display: none;
+  }
+}
+
+/* The title and its year/discipline line always stay — they only wrap. The
+   note is the part that steps aside. */
+@media (max-height: 919px) and (max-width: 999px) {
+  .corner-note {
+    display: none;
+  }
+}
+
+/* A genuinely short window — a small browser, a phone turned sideways. The
+   slate rail is the tallest thing in the corner and will reach the status
+   bar before anything else does, so it tightens, and the striped mark goes
+   first because it is the only part carrying no information. Credits are
+   never dropped: someone else's name is not spare height. */
+@media (max-height: 659px) {
+  .corner-slate {
+    display: none;
+  }
+  .corner-rail > div {
+    margin-top: 0.5rem;
+  }
+  .corner-rail dd {
+    font-size: 0.75rem;
+  }
+}
+
+/* The four corner words. Technical face, small, tracked; the underline is
+   transparent until the word is the page you are on, when it turns red. */
+.corner-word {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: opacity 0.2s ease;
+}
+.corner-word:hover {
+  opacity: 0.6;
+}
+
+/* The light page (the Work index) takes the whole canvas with it, so an
+   overscroll or a short window never shows a band of black around it. */
+html:has([data-tone="light"]),
+html:has([data-tone="light"]) body {
+  background: #ebe6da;
+}
+
+/* The Work index frames: black and white until looked at, the caption
+   only on the frame being looked at. Where nothing can be pointed at (a
+   touch screen) both are shown outright. */
+.work-frame img {
+  filter: grayscale(1);
+  transition: filter 0.5s ease;
+}
+.work-frame:hover img,
+.work-frame:focus-visible img {
+  filter: grayscale(0);
+}
+.work-caption {
+  opacity: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), transparent);
+  transition: opacity 0.3s ease;
+}
+.work-frame:hover .work-caption,
+.work-frame:focus-visible .work-caption {
+  opacity: 1;
+}
+@media (hover: none) {
+  .work-frame img {
+    filter: none;
+  }
+  .work-caption {
+    opacity: 1;
+  }
+}
+
+/* A frame placed on the 12-column grid of an art-directed project page
+   (see Directed): its columns come in as --gc, and apply from tablet up;
+   on a phone the grid is one column. */
+@media (min-width: 768px) {
+  .gc-md {
+    grid-column: var(--gc);
+  }
+}
+
+/* The opening reel's frame: 4:5 on every screen — the reel is portrait
+   work — as tall as the screen allows with room for the corners and the
+   caption. On a wide screen the name runs out past both its sides. */
+.reel-frame {
+  width: min(100vw - 2.5rem, (100svh - 13rem) * 0.8);
+  aspect-ratio: 4 / 5;
+}
+@media (min-width: 768px) {
+  .reel-frame {
+    width: min(100vw - 5rem, (100svh - 11rem) * 0.8);
+  }
+}
+
+/* The small technical voice used for every caption and label. In the
+   components layer so a utility on the same element (a larger size, a
+   different tracking) wins; unlayered, this rule beat every utility and
+   a paragraph asked to be set at 17px came out at 12. */
+@layer components {
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+/* The film list's gates: grey at rest, the frame's own colour when its row
+   is the one being looked at. On a screen with no pointer nothing is ever
+   "looked at" in that sense, so there they are shown in colour outright. */
+.film-gate img {
+  filter: grayscale(1) brightness(0.62);
+  transition: filter 0.6s ease;
+}
+.group:hover .film-gate img,
+.film-gate[data-live] img {
+  filter: grayscale(0) brightness(0.96);
+}
+@media (hover: none) {
+  .film-gate img {
+    filter: grayscale(0) brightness(0.9);
+  }
+}
+
+/* The homepage's flight comes up out of black. A CSS animation rather than
+   a scripted one, so it runs before the script has loaded and still ends
+   visible if the script never does. */
+@keyframes flight-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.flight-in {
+  animation: flight-in 1.4s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flight-in {
+    animation: none;
+  }
+}
+
+/* While the custom cursor is mounted the native one is hidden everywhere.
+   Only set on a fine pointer — touch devices never get this class. */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* The viewfinder pointer (see Cursor). Four corner marks and a point,
+   white in difference mode: black on the bone pages, bone on the black
+   ones, and the negative of whatever photograph it is over. */
+.viewfinder {
+  opacity: var(--cursor-on, 0);
+  transition: opacity 0.2s ease;
+}
+.viewfinder-frame,
+.viewfinder-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 300;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+.viewfinder-frame {
+  width: 22px;
+  height: 22px;
+}
+.viewfinder-frame i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 0 solid #fff;
+}
+.viewfinder-frame i:nth-child(1) { left: 0; top: 0; border-left-width: 1.5px; border-top-width: 1.5px; }
+.viewfinder-frame i:nth-child(2) { right: 0; top: 0; border-right-width: 1.5px; border-top-width: 1.5px; }
+.viewfinder-frame i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1.5px; border-bottom-width: 1.5px; }
+.viewfinder-frame i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1.5px; border-bottom-width: 1.5px; }
+.viewfinder-dot {
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  background: #fff;
+  transition: opacity 0.15s ease;
+}
+@media (pointer: coarse) {
+  .viewfinder {
+    display: none;
+  }
+}
+
+/* Film grain for the darkroom: four positions a second, not sixty. A
+   continuously moving noise layer repaints the whole viewport forever and
+   reads like a filter; stepped, it reads like film. */
+@keyframes room-grain {
+  0% { background-position: 0 0; }
+  25% { background-position: -70px 40px; }
+  50% { background-position: 50px -60px; }
+  75% { background-position: -40px -30px; }
+  100% { background-position: 0 0; }
+}
