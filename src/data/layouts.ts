@@ -94,7 +94,8 @@ const LAYOUTS: Record<string, Layout> = {
   kham: {
     hero: { kind: "split", src: kham("cover.jpg"), side: "left", tone: "ink" },
     blocks: [
-      { t: "bleed", src: kham("studio-desk.jpg"), pos: "50% 62%", gap: "lg" },
+      // 1080px source: shown at its own shape, not stretched edge to edge.
+      { t: "solo", src: kham("studio-desk.jpg"), width: "md", align: "center", gap: "lg" },
       { t: "offset", big: kham("nese-box.jpg"), small: kham("huzur-box.jpg"), gap: "lg" },
       { t: "reels", srcs: [kham("kham_video_2.mp4"), kham("kham_video1.mp4"), kham("kham_konusma_4.mp4")], gap: "lg" },
       { t: "word", gap: "lg" },
@@ -111,7 +112,7 @@ const LAYOUTS: Record<string, Layout> = {
     hero: { kind: "cross", src: atiye("1.png"), titleY: 60 },
     blocks: [
       { t: "offset", big: atiye("3.png"), small: atiye("5.png"), gap: "lg" },
-      { t: "bleed", src: atiye("4.png"), pos: "50% 62%", gap: "lg" },
+      { t: "solo", src: atiye("4.png"), width: "md", align: "center", gap: "lg" },
       { t: "pair", a: atiye("2.png"), b: atiye("6.png"), gap: "md" },
     ],
   },
@@ -198,12 +199,12 @@ const LAYOUTS: Record<string, Layout> = {
   // matcha), then the pour edge to edge as the light goes, the night in
   // three, and the mat being rolled up last.
   soulhaus: {
-    hero: { kind: "split", src: sh("DSC07837-web.jpg"), side: "left", tone: "paper" },
+    hero: { kind: "split", src: sh("DSC07837.JPG"), side: "left", tone: "paper" },
     blocks: [
       { t: "pair", a: sh("DSC01972.jpg"), b: sh("DSC02010.jpg"), gap: "lg" },
       { t: "solo", src: sh("soulhaus-smoke-hand.webp"), width: "sm", align: "left", gap: "md" },
       { t: "offset", big: sh("2.png"), small: sh("DSC06814.jpg"), flip: true, gap: "lg" },
-      { t: "bleed", src: sh("4%20(2).png"), pos: "50% 38%", gap: "lg" },
+      { t: "solo", src: sh("4%20(2).png"), width: "md", align: "center", gap: "lg" },
       { t: "trio", srcs: [sh("1.png"), sh("DSC01563.jpg"), sh("DSC00879.jpg")], gap: "md" },
       { t: "solo", src: sh("DSC06805.jpg"), width: "sm", align: "right", gap: "lg" },
     ],
@@ -241,7 +242,7 @@ const LAYOUTS: Record<string, Layout> = {
     blocks: [
       { t: "notes", src: turta("turta-06-facade.jpg"), side: "left", gap: "lg" },
       { t: "offset", big: turta("turta-02-morning.jpg"), small: turta("turta-03-oven.jpg"), gap: "lg" },
-      { t: "bleed", src: turta("turta-07-cheesecake.webp"), pos: "50% 58%", gap: "lg" },
+      { t: "solo", src: turta("turta-07-cheesecake.webp"), width: "md", align: "center", gap: "lg" },
       { t: "pair", a: turta("turta-08-lattice.webp"), b: turta("turta-05-chocolate.jpg"), gap: "md" },
       { t: "solo", src: turta("turta-04-table.jpg"), width: "sm", align: "right", gap: "md" },
     ],

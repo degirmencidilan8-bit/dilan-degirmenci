@@ -292,7 +292,8 @@ function Slot({
           src={f.src}
           alt={k === 0 ? (slot.title ?? "") : ""}
           fill
-          sizes="(max-width: 768px) 220px, 320px"
+          // Tiles are up to 230px tall, so a 16:9 one is ~410px wide.
+          sizes="(max-width: 768px) 220px, 420px"
           loading={eager && k === 0 ? "eager" : "lazy"}
           className="object-cover"
           style={{ opacity: k === i ? 1 : 0, objectPosition: f.pos ?? "50% 50%" }}

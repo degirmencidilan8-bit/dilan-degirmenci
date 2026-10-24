@@ -57,7 +57,7 @@ export const projects: Project[] = [
       { src: "/media/soulhaus/1.png", ratio: "4:5", kind: "image", size: "wide", caption: "The table from above, after dark" },
       { src: "/media/soulhaus/DSC01563.jpg", ratio: "3:4", kind: "image", size: "wide", caption: "Long table, candlelight" },
       { src: "/media/soulhaus/DSC00879.jpg", ratio: "2:3", kind: "image", size: "wide", caption: "A wish" },
-      { src: "/media/soulhaus/DSC07837-web.jpg", ratio: "2:3", kind: "image", size: "wide", caption: "Champagne and pearls (web copy of DSC07837.JPG)" },
+      { src: "/media/soulhaus/DSC07837.JPG", ratio: "2:3", kind: "image", size: "wide", caption: "Champagne and pearls" },
     ],
     credits: [],
     featured: true,
