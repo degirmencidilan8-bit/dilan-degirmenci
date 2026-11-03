@@ -499,6 +499,18 @@ export const projects: Project[] = [
       { src: "/media/efsense-travel/efs-07-impact.webp", ratio: "4:5", kind: "image", size: "wide", caption: "A table set for the summit" },
       { src: "/media/efsense-travel/efs-08-this-moment.webp", ratio: "4:5", kind: "image", size: "wide", caption: "A terrace over the sea at sunset" },
       { src: "/media/efsense-travel/efs-09-next-story.webp", ratio: "4:5", kind: "image", size: "wide", caption: "The next story" },
+      // Ten more from the same account (Dilan, 2026-11-04), all 1080x1350.
+      // Their captions are each post's own headline, word for word.
+      { src: "/media/efsense-travel/efs-10-coming-soon.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Rotanın ötesinde çok yakında…" },
+      { src: "/media/efsense-travel/efs-11-destinations.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Dünyanın seçkin destinasyonlarında yalnızca size ait programlar." },
+      { src: "/media/efsense-travel/efs-12-door-hanger.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bir yolculuğun başlangıç noktası her zaman harita değildir." },
+      { src: "/media/efsense-travel/efs-13-gastronomy.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Destinasyonun lezzetle buluştuğu özel yolculuklar." },
+      { src: "/media/efsense-travel/efs-14-bali-office.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bali ofisimiz açıldı" },
+      { src: "/media/efsense-travel/efs-15-bali.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bali — Tek ada, pek çok yol" },
+      { src: "/media/efsense-travel/efs-16-bali-wellness.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Ruh, Beden ve İçsel Denge" },
+      { src: "/media/efsense-travel/efs-17-bali-culture.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Kültür ve Yerel Deneyimler" },
+      { src: "/media/efsense-travel/efs-18-bali-sea.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Deniz, Keşif ve Özgürlük" },
+      { src: "/media/efsense-travel/efs-19-congress.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bir kongrenin akışı, açılış konuşmasında değil, ondan önce verilen kararlarda şekillenir." },
     ],
     credits: [],
     featured: true,
