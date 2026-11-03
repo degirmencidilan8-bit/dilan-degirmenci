@@ -1,0 +1,349 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
+import { FitText } from "@/components/FitText";
+import { LightCurtain } from "@/components/LightCurtain";
+import { colourOf, createClothMaterial, ramp } from "@/components/ui/3d-gallery-photography";
+import imageLoader from "@/lib/image-loader";
+import { BONE, INK } from "@/data/palette";
+
+// The work, one brand at a time. The page scrolls through a tunnel in
+// chapters: each brand's strongest picture comes out of the dark, stops in
+// the middle of the screen large and sharp with the brand's name across it,
+// holds, and then flies past the viewer as the next brand arrives from the
+// depth. Three more of the brand's own pictures drift around it at other
+// depths — the tunnel's depth, but every picture in a chapter belongs to
+// it. The light falling behind takes each brand's colour.
+//
+// It replaced a tunnel of every project at once (WorkTunnel), which was
+// beautiful in motion and said nothing: thirty small pictures scattered,
+// none held long enough to be seen, none tied to a name.
+//
+// A short list of the brands runs down the left edge as the chapter index;
+// click one to travel there.
+
+export interface Chapter {
+  title: string;
+  sub: string;
+  href: string;
+  hero: string;
+  sats: string[];
+}
+
+/** Where a chapter's picture rests: this far in front of the camera. */
+const REST = 6;
+/** How far back a chapter starts. */
+const FAR = 42;
+/** How far past its rest it travels on the way out — through the camera. */
+const PASS = 6.5;
+/** Field of view, degrees. */
+const FOV = 55;
+/** Satellites, as shares of the visible width and height at rest, and a
+ * depth offset from the hero (negative: behind it). */
+const SATS = [
+  { x: -0.4, y: 0.3, dz: -4.5 },
+  { x: 0.42, y: -0.28, dz: -2.5 },
+  { x: -0.36, y: -0.34, dz: 2.2 },
+];
+/** Scroll per chapter, in screen heights. */
+const PER_CHAPTER = 0.9;
+/** The first chapter is already arriving as the section comes up. */
+const LEAD = 0.6;
+
+type Callbacks = {
+  onChapter: (k: number) => void;
+  onColours: (c: string[]) => void;
+  onHover: (k: number | null) => void;
+  onSelect: (k: number) => void;
+};
+
+// The hold: |t| under this much is the chapter at rest.
+function settle(t: number) {
+  const a = Math.max(0, Math.abs(t) - 0.14) / 0.86;
+  return Math.sign(t) * a;
+}
+
+// In fast and slowing (squared) from the back; out at an even pace, so by
+// the time the name has changed — halfway between two chapters — the old
+// picture is already going and the new one is coming up.
+function depthOf(g: number) {
+  return g < 0 ? -REST - FAR * g * g : -REST + PASS * g;
+}
+
+function aspectOf(tex: THREE.Texture | undefined) {
+  const img = tex?.image as { width?: number; height?: number } | undefined;
+  return img?.width && img?.height ? img.width / img.height : 1.5;
+}
+
+function Scene({
+  chapters,
+  progress,
+  callbacks,
+}: {
+  chapters: { hero: string; sats: string[] }[];
+  progress: RefObject<number>;
+  callbacks: RefObject<Callbacks>;
+}) {
+  // Every picture in one flat list: chapter k's hero, then its satellites.
+  const layout = useMemo(() => {
+    const urls: string[] = [];
+    const slots = chapters.map((c) => {
+      const hero = urls.push(c.hero) - 1;
+      const sats = c.sats.slice(0, SATS.length).map((s) => urls.push(s) - 1);
+      return { hero, sats };
+    });
+    return { urls, slots };
+  }, [chapters]);
+
+  const textures = useTexture(layout.urls, (loaded) => {
+    for (const t of [loaded].flat()) t.colorSpace = THREE.SRGBColorSpace;
+  });
+  const materials = useMemo(() => layout.urls.map(() => createClothMaterial()), [layout]);
+  useEffect(() => () => materials.forEach((m) => m.dispose()), [materials]);
+  useEffect(() => {
+    materials.forEach((m, i) => {
+      m.uniforms.map.value = textures[i];
+    });
+  }, [materials, textures]);
+
+  useEffect(() => {
+    callbacks.current?.onColours(layout.slots.map((s) => colourOf(textures[s.hero])));
+  }, [layout, textures, callbacks]);
+
+  const meshes = useRef<(THREE.Mesh | null)[]>([]);
+  const at = useRef(progress.current ?? 0);
+  const chapter = useRef(-1);
+
+  useFrame((state) => {
+    const target = progress.current ?? 0;
+    const prev = at.current;
+    at.current += (target - at.current) * 0.075;
+    const speed = (at.current - prev) * 60;
+    const time = state.clock.getElapsedTime();
+
+    const n = layout.slots.length;
+    const k = Math.max(0, Math.min(n - 1, Math.round(at.current)));
+    if (k !== chapter.current) {
+      chapter.current = k;
+      callbacks.current?.onChapter(k);
+    }
+
+    const viewH = 2 * REST * Math.tan(((FOV / 2) * Math.PI) / 180);
+    const viewW = viewH * (state.size.width / state.size.height);
+
+    layout.slots.forEach((slot, c) => {
+      const t = at.current - c;
+      const g = settle(t);
+      const heroZ = depthOf(g);
+      const ar = aspectOf(textures[slot.hero]);
+      // As large as the screen allows: most of its height, most of its width.
+      const h = Math.min(0.64 * viewH, (0.82 * viewW) / ar);
+
+      const place = (i: number, x: number, y: number, z: number, height: number, a: number, dof: number) => {
+        const mesh = meshes.current[i];
+        const m = materials[i];
+        if (!mesh) return;
+        const shown = Math.abs(t) < 1.3;
+        mesh.visible = shown;
+        if (!shown) return;
+        mesh.position.set(x, y, z);
+        mesh.scale.set(height * a, height, 1);
+        const fadeIn = ramp(z, -REST - FAR, -REST - FAR * 0.55);
+        const fadeOut = 1 - ramp(z, -3.6, -1.4);
+        m.uniforms.opacity.value = fadeIn * fadeOut;
+        m.uniforms.blurAmount.value = Math.min(7, dof + (g < 0 ? -g * 9 : g * 3));
+        m.uniforms.scrollForce.value = speed * 0.6;
+        m.uniforms.time.value = time;
+      };
+
+      place(slot.hero, 0, 0, heroZ, h, ar, 0);
+      slot.sats.forEach((i, j) => {
+        const s = SATS[j];
+        place(i, s.x * viewW, s.y * viewH, heroZ + s.dz, h * 0.42, aspectOf(textures[i]), s.dz < 0 ? 1.4 : 0.6);
+        materials[i].uniforms.opacity.value *= 0.85;
+      });
+    });
+  });
+
+  return (
+    <>
+      {layout.urls.map((_, i) => {
+        const owner = layout.slots.findIndex((s) => s.hero === i);
+        const isHero = owner >= 0;
+        return (
+          <mesh
+            key={i}
+            ref={(m) => {
+              meshes.current[i] = m;
+            }}
+            material={materials[i]}
+            onPointerEnter={() => {
+              if (!isHero || materials[i].uniforms.opacity.value < 0.6) return;
+              materials[i].uniforms.isHovered.value = 1;
+              callbacks.current?.onHover(owner);
+            }}
+            onPointerLeave={() => {
+              materials[i].uniforms.isHovered.value = 0;
+              if (isHero) callbacks.current?.onHover(null);
+            }}
+            onClick={() => {
+              if (isHero && materials[i].uniforms.opacity.value > 0.6) callbacks.current?.onSelect(owner);
+            }}
+          >
+            <planeGeometry args={[1, 1, 32, 32]} />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}
+
+export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
+  const n = chapters.length;
+  const router = useRouter();
+  const section = useRef<HTMLElement>(null);
+  const progress = useRef(-LEAD);
+  const callbacks = useRef<Callbacks>({ onChapter: () => {}, onColours: () => {}, onHover: () => {}, onSelect: () => {} });
+  const [chapter, setChapter] = useState(0);
+  const [colours, setColours] = useState<string[]>([]);
+  const [hover, setHover] = useState(false);
+  const [near, setNear] = useState(false);
+  const [live, setLive] = useState(false);
+
+  const sized = useMemo(
+    () =>
+      chapters.map((c) => ({
+        hero: imageLoader({ src: c.hero, width: 1600 }),
+        sats: c.sats.map((s) => imageLoader({ src: s, width: 640 })),
+      })),
+    [chapters],
+  );
+
+  // Where the page has to be for chapter k to be at rest.
+  const scrollFor = useCallback(
+    (k: number) => {
+      const el = section.current;
+      if (!el) return 0;
+      const run = el.offsetHeight - window.innerHeight;
+      return el.offsetTop + ((k + LEAD) / (n - 1 + LEAD)) * run;
+    },
+    [n],
+  );
+
+  useEffect(() => {
+    callbacks.current = {
+      onChapter: setChapter,
+      onColours: setColours,
+      onHover: (k) => setHover(k !== null),
+      onSelect: (k) => router.push(chapters[k].href),
+    };
+  }, [chapters, router]);
+
+  useEffect(() => {
+    const el = section.current;
+    if (!el) return;
+    const onScroll = () => {
+      const box = el.getBoundingClientRect();
+      const run = box.height - window.innerHeight;
+      const r = run > 0 ? Math.min(1, Math.max(0, -box.top / run)) : 0;
+      progress.current = -LEAD + r * (n - 1 + LEAD);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    const ahead = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: "100% 0px" });
+    const seen = new IntersectionObserver(([e]) => setLive(e.isIntersecting));
+    ahead.observe(el);
+    seen.observe(el);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      ahead.disconnect();
+      seen.disconnect();
+    };
+  }, [n]);
+
+  const current = chapters[chapter];
+
+  return (
+    <section ref={section} aria-label="Work" className="relative" style={{ height: `${(n - 1 + LEAD) * PER_CHAPTER * 100 + 100}svh` }}>
+      <div className="sticky top-0 h-svh overflow-hidden" style={{ background: INK }} data-cursor={hover ? "" : undefined}>
+        <LightCurtain tint={colours[chapter]} className="pointer-events-none absolute inset-0" />
+
+        {near ? (
+          <Canvas
+            camera={{ position: [0, 0, 0], fov: FOV }}
+            gl={{ antialias: true, alpha: true }}
+            frameloop={live ? "always" : "never"}
+            style={{ position: "absolute", inset: 0, touchAction: "pan-y" }}
+          >
+            <Scene chapters={sized} progress={progress} callbacks={callbacks} />
+          </Canvas>
+        ) : null}
+
+        {/* Vignette: the sides and the floor close in; the top, where the
+            light falls from, stays open. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: `radial-gradient(ellipse 85% 95% at 50% 25%, transparent 45%, ${INK} 100%)` }}
+        />
+        <div aria-hidden className="tunnel-grain pointer-events-none absolute inset-0" />
+
+        {/* The brand's name across its picture, one chapter at a time. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 mix-blend-exclusion" style={{ color: BONE }}>
+          {chapters.map((c, k) => (
+            <div
+              key={c.href}
+              // Clear of the index on the left, and as much again on the right.
+              className="absolute inset-x-0 top-1/2 px-3 md:px-[13.5rem]"
+              style={{
+                opacity: k === chapter ? 1 : 0,
+                transform: `translateY(calc(-50% + ${k === chapter ? 0 : k < chapter ? -6 : 6}vh))`,
+                transition: "opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1)",
+              }}
+            >
+              <FitText
+                text={c.title}
+                maxVh={26}
+                className="display leading-[0.85]"
+                style={{ ["--dw" as string]: "62", ["--dg" as string]: "900", ["--dt" as string]: "-0.02em" }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* The index: every brand, the current one lit. */}
+        <nav aria-label="Brands" className="absolute left-5 top-1/2 hidden -translate-y-1/2 flex-col gap-1.5 md:flex" style={{ color: BONE }}>
+          {chapters.map((c, k) => (
+            <button
+              key={c.href}
+              type="button"
+              onClick={() => window.scrollTo({ top: scrollFor(k), behavior: "smooth" })}
+              className="mono flex gap-3 text-left transition-opacity"
+              style={{ fontSize: "0.625rem", opacity: k === chapter ? 1 : 0.32 }}
+            >
+              <span>{String(k + 1).padStart(2, "0")}</span>
+              <span>{c.title}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* The chapter's line, and the way in. */}
+        <div className="absolute inset-x-0 bottom-20 flex flex-col items-center gap-2 text-center md:bottom-16" style={{ color: BONE }}>
+          <span className="mono opacity-55" style={{ fontSize: "0.6875rem" }}>
+            {String(chapter + 1).padStart(2, "0")}/{String(n).padStart(2, "0")} — {current.sub}
+          </span>
+          <Link href={current.href} className="mono border-b pb-0.5" style={{ fontSize: "0.6875rem", borderColor: BONE }}>
+            View project →
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
