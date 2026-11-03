@@ -443,6 +443,46 @@ function BlockView({
         </div>
       );
     }
+    case "plate": {
+      const m = get(b.src);
+      if (!m) return null;
+      const paper = b.tone === "paper";
+      const right = b.side === "right";
+      // A portrait takes five columns, a landscape eight; the words take
+      // the next ones over, one column of air between.
+      const portrait = RATIO_VALUE[m.ratio] < 1;
+      const span = portrait ? 5 : 8;
+      const words = portrait ? 4 : 3;
+      const pic = right ? `${13 - span} / span ${span}` : `1 / span ${span}`;
+      const txt = right ? `${12 - span - words} / span ${words}` : `${span + 2} / span ${words}`;
+      const inner = (
+        <div className={`${COLUMN} grid grid-cols-1 gap-6 md:grid-cols-12 md:items-end md:gap-4`}>
+          <div className="gc-md md:row-start-1" style={{ ["--gc" as string]: pic }}>
+            <Shot m={m} sizes={portrait ? "(max-width: 768px) 92vw, 33rem" : "(max-width: 768px) 92vw, 53rem"} />
+          </div>
+          <div className="gc-md md:row-start-1" style={{ ["--gc" as string]: txt }}>
+            <span
+              className="display display-outline block text-[3.5rem] leading-[0.8] md:text-[6rem]"
+              style={{ ["--stroke" as string]: "1px" }}
+            >
+              {String(n).padStart(2, "0")}
+            </span>
+            {m.caption ? (
+              <p className="mt-5 max-w-[20ch] text-2xl font-light leading-[1.15] md:text-[2rem]">{m.caption}</p>
+            ) : null}
+          </div>
+        </div>
+      );
+      if (!paper) return <div className={gap}>{inner}</div>;
+      return (
+        <section
+          className={`${gap} bg-paper py-16 text-ink md:py-28`}
+          style={{ ["--stroke-color" as string]: "var(--color-ink)" }}
+        >
+          {inner}
+        </section>
+      );
+    }
     case "word":
       return (
         <div className={`${gap} overflow-hidden`} aria-hidden>
@@ -469,7 +509,7 @@ export function Directed({
   film?: Film;
 }) {
   // Small numbers on the captioned frames, counted down the page.
-  const captioned = (b: Block) => b.t === "offset" || (b.t === "solo" && !b.bare);
+  const captioned = (b: Block) => b.t === "offset" || b.t === "plate" || (b.t === "solo" && !b.bare);
   const counted = layout.blocks.map((_, i) => layout.blocks.slice(0, i + 1).filter(captioned).length);
   return (
     <div>

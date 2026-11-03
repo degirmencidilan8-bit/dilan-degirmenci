@@ -57,6 +57,10 @@ export type Block = { gap?: Gap } & (
   | { t: "notes"; src?: string; side?: "left" | "right" }
   /** The name again, hollow, running off both edges. */
   | { t: "word" }
+  /** Set like a magazine plate: one picture large, beside it its number,
+   * hollow, and its own caption set large. `tone: "paper"` lays it on a
+   * light band running edge to edge, like a turned page. */
+  | { t: "plate"; src: string; side: "left" | "right"; tone?: "ink" | "paper" }
 );
 
 export interface Layout {
@@ -180,19 +184,25 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // A festival is wide: the red carpet fills the screen and the name sits
-  // on its red. Then the city, the posters and the band; the name again;
-  // the carpet edge to edge; arrivals in a run of three; and the evening.
+  // A photo essay, set like a magazine's. The name as a masthead and the
+  // white dress under it as the cover; the statement; then the festival
+  // told in numbered plates, each with its own caption, between runs of
+  // pictures: the river road, the box office and the posters, the band on
+  // a paper page. The name again, the carpet, arrivals in three, the
+  // interview, and the reception small to close.
   "sarajevo-film-festival": {
-    hero: { kind: "bleed", src: sff("sff-08-white-dress.jpg"), pos: "50% 35%", titleAt: "bottom" },
+    hero: { kind: "type" },
     blocks: [
-      { t: "pair", a: sff("sff-01-street.jpg"), b: sff("sff-02-box-office.jpg"), gap: "lg" },
-      { t: "pair", a: sff("sff-04-posters.jpg"), b: sff("sff-06-band.jpg"), gap: "none" },
+      { t: "full", src: sff("sff-08-white-dress.jpg"), gap: "md" },
       { t: "notes", gap: "lg" },
+      { t: "plate", src: sff("sff-01-street.jpg"), side: "left", gap: "lg" },
+      { t: "pair", a: sff("sff-02-box-office.jpg"), b: sff("sff-04-posters.jpg"), gap: "lg" },
+      { t: "plate", src: sff("sff-06-band.jpg"), side: "right", tone: "paper", gap: "lg" },
       { t: "word", gap: "lg" },
-      { t: "bleed", src: sff("sff-07-couple.jpg"), pos: "50% 40%", gap: "lg" },
+      { t: "full", src: sff("sff-07-couple.jpg"), gap: "lg" },
       { t: "trio", srcs: [sff("sff-09-sunglasses.jpg"), sff("sff-10-trio.jpg"), sff("sff-11-arrivals.jpg")], gap: "md" },
-      { t: "offset", big: sff("sff-03-interview.jpg"), small: sff("sff-05-reception.jpg"), gap: "lg" },
+      { t: "plate", src: sff("sff-03-interview.jpg"), side: "left", gap: "lg" },
+      { t: "solo", src: sff("sff-05-reception.jpg"), width: "md", align: "right", gap: "md" },
     ],
   },
 
@@ -243,13 +253,14 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // The granola from above, edge to edge, hard shadow and all. Then the
-  // chili oil beside the brief, the four films as a strip, three plates,
-  // and the omelette to close.
+  // The chili oil bottle, lit through, the pan going behind it, fills one
+  // half; the other half is a paper sheet with the name and the notes.
+  // (A cross opening ran the name in negative over the amber and turned
+  // it blue.) Then the four films as a strip, the granola from above,
+  // three plates, and the omelette to close.
   "freya-gurme": {
-    hero: { kind: "bleed", src: freya("DSC02467.jpg"), pos: "50% 50%", titleAt: "bottom" },
+    hero: { kind: "split", src: freya("13.png"), side: "left", tone: "paper" },
     blocks: [
-      { t: "notes", src: freya("13.png"), side: "right", gap: "lg" },
       {
         t: "reels",
         srcs: [
@@ -260,6 +271,7 @@ const LAYOUTS: Record<string, Layout> = {
         ],
         gap: "lg",
       },
+      { t: "full", src: freya("DSC02467.jpg"), gap: "lg" },
       { t: "trio", srcs: [freya("1.png"), freya("17.png"), freya("5.png")], gap: "lg" },
       { t: "bleed", src: freya("DSC04685.jpg"), gap: "lg" },
     ],
@@ -315,14 +327,20 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // White tablecloths: the paper half belongs here. Mid-bite on the right,
-  // the room edge to edge, then two offset pairs, one each way.
+  // Set like a magazine feature. The name as a masthead; mezze mid-bite as
+  // the first plate, on a paper page (white tablecloths), its caption
+  // beside it; the brief; the room at the column's width; the hummus
+  // served, a plate on the dark; the table and the glass side by side,
+  // held to the screen's height; and the round mirror on paper to close.
   sargus: {
-    hero: { kind: "split", src: sargus("sargus-05-dining-moment.jpg"), side: "right", tone: "paper" },
+    hero: { kind: "type" },
     blocks: [
-      { t: "bleed", src: sargus("sargus-01-interior.jpg"), pos: "50% 55%", gap: "lg" },
-      { t: "offset", big: sargus("sargus-04-serving.jpg"), small: sargus("sargus-06-afterimage.jpg"), gap: "lg" },
-      { t: "offset", big: sargus("sargus-03-table-setting.jpg"), small: sargus("sargus-02-mirror-detail.jpg"), flip: true, gap: "md" },
+      { t: "plate", src: sargus("sargus-05-dining-moment.jpg"), side: "left", tone: "paper", gap: "md" },
+      { t: "notes", gap: "lg" },
+      { t: "full", src: sargus("sargus-01-interior.jpg"), gap: "lg" },
+      { t: "plate", src: sargus("sargus-04-serving.jpg"), side: "right", gap: "lg" },
+      { t: "reels", srcs: [sargus("sargus-03-table-setting.jpg"), sargus("sargus-06-afterimage.jpg")], gap: "lg" },
+      { t: "plate", src: sargus("sargus-02-mirror-detail.jpg"), side: "left", tone: "paper", gap: "lg" },
     ],
   },
 
@@ -372,15 +390,27 @@ const LAYOUTS: Record<string, Layout> = {
   },
 
   // Collages with their own type on them: nothing goes over them. The name
-  // first, then the sunset at full width, the poster beside the brief, two
-  // collages side by side, and the last one with the film.
+  // first, then the sunset at full width, the poster beside the brief, the
+  // four films as a strip (the cup, then the app's three), two collages
+  // side by side, and the padel court edge to edge to close.
   glass: {
     hero: { kind: "type" },
     blocks: [
       { t: "full", src: glass("glass-rhythm.jpg"), gap: "md" },
       { t: "notes", src: glass("glass-hero.jpg"), side: "left", gap: "lg" },
+      {
+        t: "reels",
+        srcs: [
+          glass("glass_bosphorus_etkinlik_v1.mp4"),
+          glass("glass-community.mp4"),
+          glass("glass-connect.mp4"),
+          glass("glass-support.mp4"),
+        ],
+        bare: true,
+        gap: "lg",
+      },
       { t: "pair", a: glass("glass-cliff.jpg"), b: glass("glass-bodrum.jpg"), gap: "lg" },
-      { t: "offset", big: glass("glass-padel.jpg"), small: glass("glass_bosphorus_etkinlik_v1.mp4"), gap: "md" },
+      { t: "bleed", src: glass("glass-padel.jpg"), gap: "lg" },
     ],
   },
 

@@ -26,6 +26,11 @@ export const projects: Project[] = [
       { src: "/media/glass/glass-bodrum.jpg", ratio: "4:3", kind: "image", size: "wide", caption: "White houses, turquoise water, endless sunsets" },
       { src: "/media/glass/glass-padel.jpg", ratio: "4:3", kind: "image", size: "wide", caption: "This summer, padel joins the story" },
       { src: "/media/glass/glass_bosphorus_etkinlik_v1.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Bosphorus Padel Cup" },
+      // Three app films that were in the folder but never listed here, so
+      // no page could show them. No captions: none were given.
+      { src: "/media/glass/glass-community.mp4", ratio: "9:16", kind: "video", size: "wide", poster: "/media/glass/glass-community-still.jpg" },
+      { src: "/media/glass/glass-connect.mp4", ratio: "9:16", kind: "video", size: "wide", poster: "/media/glass/glass-connect-still.jpg" },
+      { src: "/media/glass/glass-support.mp4", ratio: "9:16", kind: "video", size: "wide", poster: "/media/glass/glass-support-still.jpg" },
     ],
     credits: [],
     featured: true,
