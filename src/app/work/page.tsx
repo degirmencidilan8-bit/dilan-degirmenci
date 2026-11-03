@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
-import { WorkGrid } from "@/components/WorkGrid";
-import { BONE, INK } from "@/data/palette";
+import { WorkIndex } from "@/components/WorkIndex";
+import { getField } from "@/data/field";
+import { INK } from "@/data/palette";
 import { getWorkIndex } from "@/data/work-index";
 
 export const metadata: Metadata = {
   title: "Work — Dilan&Batuhan",
 };
 
-// The index: films and photography in one grid on the light ground. See
-// WorkGrid and data/work-index.ts.
+// The index: films and photography as one wall of cards on the dark
+// ground, opened by an aperture, with a globe as the other view. See
+// WorkIndex. (Before it: a light page of greyscale 16:9 frames, WorkGrid.)
 export default function WorkPage() {
+  const field = getField().filter((s) => s.href);
+  // Each card carries its project's whole set, to cut through on a look.
+  const sets = new Map(field.map((s) => [s.href!, s.frames]));
+  const cards = getWorkIndex().map((it) => ({ ...it, frames: sets.get(it.href) ?? [] }));
+
   return (
-    <main
-      data-tone="light"
-      className="min-h-svh px-3 pb-24 pt-20 md:px-5 md:pt-24"
-      style={{ background: BONE, color: INK }}
-    >
-      <h1 className="sr-only">Work</h1>
-      <WorkGrid items={getWorkIndex()} />
+    <main className="min-h-svh" style={{ background: INK }}>
+      <WorkIndex cards={cards} slots={field} />
     </main>
   );
 }

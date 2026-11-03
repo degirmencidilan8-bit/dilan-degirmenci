@@ -28,10 +28,10 @@ const LINKS = [
   { href: "/contact", label: "Contact", corner: "bottom-4 right-5 md:bottom-6 md:right-8" },
 ];
 
-/** Pages set on the light ground: the index of work, and the projects
- * written up as features — photography is set on paper. */
+/** Pages set on the light ground: the projects written up as features —
+ * photography is set on paper. (The index of work was too, until it moved
+ * to the dark ground with WorkIndex.) */
 export function isLightPage(pathname: string) {
-  if (pathname === "/work") return true;
   const m = pathname.match(/^\/work\/([^/]+)$/);
   return Boolean(m && FEATURE_SLUGS.has(decodeURIComponent(m[1])));
 }
