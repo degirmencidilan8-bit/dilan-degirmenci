@@ -352,6 +352,22 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
     [n],
   );
 
+  // Where each chapter rests, from the top of the tunnel, in px: a stop
+  // for the scroll there, so a hard flick on a phone moves one brand on
+  // and not three (see .tunnel-stop). Measured, not written in svh: the
+  // phone's toolbar changes the screen's height, and the rest with it.
+  const [stops, setStops] = useState<number[]>([]);
+  useEffect(() => {
+    const measure = () => {
+      const el = section.current;
+      if (!el) return;
+      setStops(Array.from({ length: n }, (_, k) => Math.round(scrollFor(k) - el.offsetTop)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [n, scrollFor]);
+
   useEffect(() => {
     callbacks.current = {
       onChapter: setChapter,
@@ -426,6 +442,9 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
       // plain dark between the two.
       style={{ height: `${(n - 1 + LEAD) * PER_CHAPTER * 100 + 100}svh`, marginTop: `-${OVERLAP}svh` }}
     >
+      {stops.map((top, k) => (
+        <div key={k} aria-hidden className="tunnel-stop" style={{ top }} />
+      ))}
       <div className="sticky top-0 h-svh overflow-hidden" style={{ background: INK }} data-cursor={hover ? "" : undefined}>
         <LightCurtain tint={colours[chapter]} className="pointer-events-none absolute inset-0" />
         {/* The focus pull dims the room too: the light behind falls back
@@ -484,7 +503,9 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
           className="absolute left-5 top-1/2 hidden -translate-y-1/2 md:block"
           style={{
             height: "24rem",
-            width: "19rem",
+            // Wide enough for the longest name at the front, where it is
+            // drawn a quarter larger; the fade mask cuts at this edge.
+            width: "26rem",
             color: BONE,
             maskImage: "linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)",

@@ -225,6 +225,26 @@ a {
   }
 }
 
+/* The homepage's scroll stops: the opening, then each brand of the tunnel
+   at rest. On a touch screen only, where one hard flick would otherwise
+   carry the tunnel two or three brands on; with a mouse or trackpad the
+   scroll stays free. Each stop is one the scroll cannot pass in a single
+   gesture. */
+.tunnel-stop {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+@media (pointer: coarse) {
+  html:has(.tunnel-stop) {
+    scroll-snap-type: y mandatory;
+  }
+}
+
 /* The four corner words. Technical face, small, tracked; the underline is
    transparent until the word is the page you are on, when it turns red. */
 .corner-word {

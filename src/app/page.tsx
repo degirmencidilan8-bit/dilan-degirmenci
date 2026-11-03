@@ -52,6 +52,9 @@ export default function Home() {
       {/* Above the tunnel, which starts under its last stretch: the
           tunnel's light shows through the dark around the frame. */}
       <div className="relative z-10">
+        {/* The first stop for the scroll on a touch screen: the opening,
+            whole. The tunnel's own stops follow (see BrandTunnel). */}
+        <div aria-hidden className="tunnel-stop" style={{ top: 0 }} />
         <Opener reel={getReel()} />
       </div>
       <BrandTunnel chapters={chapters} />
