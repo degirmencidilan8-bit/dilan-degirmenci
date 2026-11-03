@@ -351,15 +351,16 @@ html:has([data-tone="light"]) body {
   cursor: none !important;
 }
 
-/* The viewfinder pointer (see Cursor). Four corner marks and a point,
-   white in difference mode: black on the bone pages, bone on the black
-   ones, and the negative of whatever photograph it is over. */
+/* The iris pointer (see Cursor). A turning iris, and four corner marks
+   that frame whatever can be pressed, white in difference mode: black on
+   the bone pages, bone on the black ones, and the negative of whatever
+   photograph it is over. */
 .viewfinder {
   opacity: var(--cursor-on, 0);
   transition: opacity 0.2s ease;
 }
 .viewfinder-frame,
-.viewfinder-dot {
+.viewfinder-iris {
   position: fixed;
   left: 0;
   top: 0;
@@ -371,6 +372,8 @@ html:has([data-tone="light"]) body {
 .viewfinder-frame {
   width: 22px;
   height: 22px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 .viewfinder-frame i {
   position: absolute;
@@ -382,12 +385,13 @@ html:has([data-tone="light"]) body {
 .viewfinder-frame i:nth-child(2) { right: 0; top: 0; border-right-width: 1.5px; border-top-width: 1.5px; }
 .viewfinder-frame i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1.5px; border-bottom-width: 1.5px; }
 .viewfinder-frame i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1.5px; border-bottom-width: 1.5px; }
-.viewfinder-dot {
-  width: 3px;
-  height: 3px;
-  margin: -1.5px 0 0 -1.5px;
-  background: #fff;
-  transition: opacity 0.15s ease;
+.viewfinder-iris {
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+}
+.viewfinder-iris svg {
+  display: block;
 }
 @media (pointer: coarse) {
   .viewfinder {
@@ -442,7 +446,8 @@ html:has([data-tone="light"]) body {
     animation: none;
   }
   /* The Work cards appear without rising out of the dark. */
-  .work-card {
+  .work-card,
+  .work-letter {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
