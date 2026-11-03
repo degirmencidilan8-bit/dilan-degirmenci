@@ -127,7 +127,12 @@ function Scene({
   }, [chapters]);
 
   const textures = useTexture(layout.urls, (loaded) => {
-    for (const t of [loaded].flat()) t.colorSpace = THREE.SRGBColorSpace;
+    for (const t of [loaded].flat()) {
+      t.colorSpace = THREE.SRGBColorSpace;
+      // Frames are seen bent and at an angle; without this the GPU blurs
+      // them there. three.js caps it at what the device supports.
+      t.anisotropy = 8;
+    }
   });
   const materials = useMemo(() => layout.urls.map(() => createClothMaterial()), [layout]);
   useEffect(() => () => materials.forEach((m) => m.dispose()), [materials]);
@@ -302,15 +307,21 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
   const [live, setLive] = useState(false);
   const items = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const sized = useMemo(
-    () =>
-      chapters.map((c) => ({
-        hero: imageLoader({ src: c.hero, width: 1600 }),
-        video: c.video,
-        sats: c.sats.map((s) => imageLoader({ src: s, width: 640 })),
-      })),
-    [chapters],
-  );
+  const sized = useMemo(() => {
+    // The chapter's picture fills most of a screen, bent: a fixed 1600 went
+    // soft on a sharp wide screen. Sized to the screen instead (all nine
+    // are held at once, so a phone keeps small files), up to 2400.
+    const hero =
+      typeof window === "undefined"
+        ? 1600
+        : Math.min(2400, Math.round(window.innerWidth * Math.min(2, window.devicePixelRatio || 1) * 0.75));
+    const sat = Math.min(1024, Math.max(320, Math.round(hero * 0.45)));
+    return chapters.map((c) => ({
+      hero: imageLoader({ src: c.hero, width: hero }),
+      video: c.video,
+      sats: c.sats.map((s) => imageLoader({ src: s, width: sat })),
+    }));
+  }, [chapters]);
 
   // Where the page has to be for chapter k to be at rest.
   const scrollFor = useCallback(

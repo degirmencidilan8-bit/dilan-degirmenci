@@ -88,20 +88,24 @@ const vm = at("villa-meze");
 
 const LAYOUTS: Record<string, Layout> = {
   // Dark, slow, tactile. The candle being lit holds one half of the
-  // screen; the other half says what the brand asked for. Then the desk
-  // edge to edge, the boxes large and small, the films as a strip, the
-  // name again, and it closes small: the seal and a tealight.
+  // screen; the other half says what the brand asked for. Then, as on
+  // Holiday Inn, the three dark films straight under it as one strip.
+  // The boxes large and small; the candle held over moss beside the
+  // desk; the tealight on the log beside the seal. The name again, and
+  // after it the daylight chapter on its own: the diffuser on glass with
+  // the two bright product films (orange, flowers), which broke the dark
+  // run when they sat inside it. It closes on one small flame.
   kham: {
     hero: { kind: "split", src: kham("cover.jpg"), side: "left", tone: "ink" },
     blocks: [
-      // 1080px source: shown at its own shape, not stretched edge to edge.
-      { t: "solo", src: kham("studio-desk.jpg"), width: "md", align: "center", gap: "lg" },
+      { t: "reels", srcs: [kham("kham_video_2.mp4"), kham("kham_video1.mp4"), kham("kham_konusma_4.mp4")], gap: "md" },
       { t: "offset", big: kham("nese-box.jpg"), small: kham("huzur-box.jpg"), gap: "lg" },
-      { t: "reels", srcs: [kham("kham_video_2.mp4"), kham("kham_video1.mp4"), kham("kham_konusma_4.mp4")], gap: "lg" },
+      // 1080px sources: side by side, never edge to edge.
+      { t: "pair", a: kham("orman-ritual.jpg"), b: kham("studio-desk.jpg"), gap: "lg" },
+      { t: "pair", a: kham("DSC08020.jpg"), b: kham("huzur-seal-detail.jpg"), gap: "md" },
       { t: "word", gap: "lg" },
-      { t: "trio", srcs: [kham("orman-ritual.jpg"), kham("4.png"), kham("DSC08020.jpg")], gap: "md" },
-      { t: "reels", srcs: [kham("kham_nese_21.mp4"), kham("kham_gunes_22.mp4")], gap: "lg" },
-      { t: "pair", a: kham("huzur-seal-detail.jpg"), b: kham("tealight-closing.jpg"), gap: "lg" },
+      { t: "trio", srcs: [kham("4.png"), kham("kham_nese_21.mp4"), kham("kham_gunes_22.mp4")], gap: "lg" },
+      { t: "solo", src: kham("tealight-closing.jpg"), width: "md", align: "center", gap: "lg" },
     ],
   },
 
@@ -191,50 +195,50 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // The crimson soup is the loudest square in the set; it takes half the
-  // screen. Then the film edge to edge, the dusk large against the tall
-  // bar frame, three plates in a row and two to close.
+  // Rebuilt like Holiday Inn: the name as wide as the page, the evening
+  // film straight under it at the column's width, then the crimson soup
+  // beside the brief (the split opening faded up slowly from black and
+  // read as an empty screen).
   naya: {
-    hero: { kind: "split", src: naya("naya-02-crimson.jpg"), side: "right", tone: "ink" },
+    hero: { kind: "type" },
     blocks: [
-      { t: "bleed", src: naya("NAYA_VIDEO.mp4"), gap: "lg" },
+      { t: "full", src: naya("NAYA_VIDEO.mp4"), gap: "md" },
+      { t: "notes", src: naya("naya-02-crimson.jpg"), side: "right", gap: "lg" },
       { t: "offset", big: naya("naya-06-dusk.jpg"), small: naya("naya-08-afterglow.jpg"), gap: "lg" },
       { t: "trio", srcs: [naya("naya-03-service.jpg"), naya("naya-07-signature.jpg"), naya("naya-05-golden.jpg")], gap: "lg" },
       { t: "pair", a: naya("naya-04-daylight.jpg"), b: naya("naya-01-arrival.jpg"), gap: "none" },
     ],
   },
 
-  // Day into night. The pearls on red open it, on a paper half, the
-  // sharpest contrast in the set. The afternoon (cocktails, the parasol,
-  // matcha), then the pour edge to edge as the light goes, the night in
-  // three, and the mat being rolled up last. The films come first, right
-  // under the opening, in two strips of four: the evening's (bar, pizza,
-  // fire, the private room), then the day's.
+  // Rebuilt like Holiday Inn, and edited down: "from the first stretch to
+  // the last call" told once, in order. The name as wide as the page, the
+  // day's four films under it, then the pearls on red beside the brief.
+  // The day in photographs (matcha and the mat, the terrace in the sun,
+  // three glasses), the name, the evening's four films, three from the
+  // night, and it closes on the long table and a wish. Thirteen
+  // photographs instead of twenty-five: the softer 1080px frames that
+  // repeated the same glass were left in the project data, off the page.
   soulhaus: {
-    hero: { kind: "split", src: sh("DSC07837.JPG"), side: "left", tone: "paper" },
+    hero: { kind: "type" },
     blocks: [
-      {
-        t: "reels",
-        srcs: [sh("sh-cugi-1.mp4"), sh("sh-cugi-2.mp4"), sh("sh-fire.mp4"), sh("sh-vip-room.mp4")],
-        gap: "lg",
-      },
       {
         t: "reels",
         srcs: [sh("sh-matcha-latte.mp4"), sh("sh-hammock-yoga.mp4"), sh("sh-photographs.mp4"), sh("sh-cugi-3.mp4")],
         gap: "md",
       },
+      { t: "notes", src: sh("DSC07837.JPG"), side: "right", gap: "lg" },
+      { t: "offset", big: sh("DSC06814.jpg"), small: sh("DSC06805.jpg"), gap: "lg" },
       { t: "pair", a: sh("DSC01972.jpg"), b: sh("DSC02010.jpg"), gap: "lg" },
-      { t: "solo", src: sh("soulhaus-smoke-hand.webp"), width: "sm", align: "left", gap: "md" },
-      // The 1080px photographs go only in pairs and threes, never large.
-      { t: "trio", srcs: [sh("sh-raised-glass.webp"), sh("sh-dried-lime.webp"), sh("sh-red-sour.webp")], gap: "lg" },
-      { t: "offset", big: sh("2.png"), small: sh("DSC06814.jpg"), flip: true, gap: "lg" },
-      { t: "pair", a: sh("sh-pizza-pull.webp"), b: sh("sh-cheers.webp"), gap: "lg" },
-      { t: "pair", a: sh("sh-iced-coffee.webp"), b: sh("sh-white-wine.webp"), gap: "md" },
-      { t: "solo", src: sh("4%20(2).png"), width: "md", align: "center", gap: "lg" },
-      { t: "trio", srcs: [sh("sh-shots.webp"), sh("sh-two-cocktails.webp"), sh("sh-sunset-wine.webp")], gap: "lg" },
-      { t: "trio", srcs: [sh("1.png"), sh("DSC01563.jpg"), sh("DSC00879.jpg")], gap: "lg" },
-      { t: "pair", a: sh("sh-espresso-martini.webp"), b: sh("sh-birthday-wall.webp"), gap: "md" },
-      { t: "pair", a: sh("sh-mat-unrolled.jpg"), b: sh("DSC06805.jpg"), gap: "lg" },
+      // The 1080px photographs go only in threes, never large.
+      { t: "trio", srcs: [sh("sh-raised-glass.webp"), sh("sh-red-sour.webp"), sh("sh-sunset-wine.webp")], gap: "md" },
+      { t: "word", gap: "lg" },
+      {
+        t: "reels",
+        srcs: [sh("sh-cugi-1.mp4"), sh("sh-cugi-2.mp4"), sh("sh-fire.mp4"), sh("sh-vip-room.mp4")],
+        gap: "lg",
+      },
+      { t: "trio", srcs: [sh("sh-pizza-pull.webp"), sh("sh-espresso-martini.webp"), sh("sh-birthday-wall.webp")], gap: "lg" },
+      { t: "pair", a: sh("DSC01563.jpg"), b: sh("DSC00879.jpg"), gap: "md" },
     ],
   },
 
