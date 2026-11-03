@@ -28,8 +28,11 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
   `npm run dev` çıktısındaki "Network" adresini (ör. `http://192.168.1.29:3000`)
   telefonun tarayıcısında açın. Açılmazsa Windows güvenlik duvarında Node.js'e
   izin verin ya da ağı "Özel" yapın.
-- Batu'nun değişiklikleri `batu-duzenleme` dalına gönderilir, `main`'e değil.
-  Dilan inceleyip uygun görürse `main`'e birleştirir (o zaman canlıya çıkar).
+- **Ortak çalışma dalı `batu-duzenleme`** (2026-11-04'ten beri). Dilan da
+  Batu da bu dalda çalışır ve buraya gönderir, `main`'e değil. Oturuma
+  başlarken `git checkout batu-duzenleme` ve `git pull`.
+  `main` yalnızca canlı site içindir: ikiniz de hazır olduğunuza karar
+  verince `batu-duzenleme` `main`'e birleştirilir, o zaman canlıya çıkar.
   Bu dalın Vercel önizlemesi:
   https://dilan-degirmenci-scripts-git-batu-duzenleme-dilanfarah.vercel.app
   (Dilan'ın Vercel hesabıyla girişliyken açılır.)
