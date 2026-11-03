@@ -100,6 +100,7 @@ const LAYOUTS: Record<string, Layout> = {
       { t: "reels", srcs: [kham("kham_video_2.mp4"), kham("kham_video1.mp4"), kham("kham_konusma_4.mp4")], gap: "lg" },
       { t: "word", gap: "lg" },
       { t: "trio", srcs: [kham("orman-ritual.jpg"), kham("4.png"), kham("DSC08020.jpg")], gap: "md" },
+      { t: "reels", srcs: [kham("kham_nese_21.mp4"), kham("kham_gunes_22.mp4")], gap: "lg" },
       { t: "pair", a: kham("huzur-seal-detail.jpg"), b: kham("tealight-closing.jpg"), gap: "lg" },
     ],
   },
@@ -147,13 +148,18 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // The dancer on the dark ground is the one frame in the set that can
-  // carry the name through it. After it, the studio and what was done;
-  // the films; three of the class; the trophies against the black-and-white.
+  // The black-and-white film carries the name through it: Joseph Pilates
+  // then, the studio now, the title negative across it. After it, the
+  // studio and what was done; the dancer on the dark ground, small; the
+  // films; three of the class; the trophies against the black-and-white.
   "happy-pilates": {
-    hero: { kind: "cross", src: hp("3.png"), titleY: 52 },
+    // The film's own subtitles run across its middle: the name crosses
+    // lower, clear of them.
+    hero: { kind: "cross", src: hp("hp-joseph-pilates.mp4"), titleY: 72 },
     blocks: [
       { t: "notes", src: hp("DSC07748.jpg"), side: "left", gap: "lg" },
+      // 1023px wide: shown small.
+      { t: "solo", src: hp("3.png"), width: "sm", align: "left", gap: "md" },
       {
         t: "reels",
         srcs: [hp("Happy_Ak%C4%B1m3.mp4"), hp("training1.mp4"), hp("happypilates_sorucevap_1.mp4")],
@@ -197,16 +203,34 @@ const LAYOUTS: Record<string, Layout> = {
   // Day into night. The pearls on red open it, on a paper half, the
   // sharpest contrast in the set. The afternoon (cocktails, the parasol,
   // matcha), then the pour edge to edge as the light goes, the night in
-  // three, and the mat being rolled up last.
+  // three, and the mat being rolled up last. The films come first, right
+  // under the opening, in two strips of four: the evening's (bar, pizza,
+  // fire, the private room), then the day's.
   soulhaus: {
     hero: { kind: "split", src: sh("DSC07837.JPG"), side: "left", tone: "paper" },
     blocks: [
+      {
+        t: "reels",
+        srcs: [sh("sh-cugi-1.mp4"), sh("sh-cugi-2.mp4"), sh("sh-fire.mp4"), sh("sh-vip-room.mp4")],
+        gap: "lg",
+      },
+      {
+        t: "reels",
+        srcs: [sh("sh-matcha-latte.mp4"), sh("sh-hammock-yoga.mp4"), sh("sh-photographs.mp4"), sh("sh-cugi-3.mp4")],
+        gap: "md",
+      },
       { t: "pair", a: sh("DSC01972.jpg"), b: sh("DSC02010.jpg"), gap: "lg" },
       { t: "solo", src: sh("soulhaus-smoke-hand.webp"), width: "sm", align: "left", gap: "md" },
+      // The 1080px photographs go only in pairs and threes, never large.
+      { t: "trio", srcs: [sh("sh-raised-glass.webp"), sh("sh-dried-lime.webp"), sh("sh-red-sour.webp")], gap: "lg" },
       { t: "offset", big: sh("2.png"), small: sh("DSC06814.jpg"), flip: true, gap: "lg" },
+      { t: "pair", a: sh("sh-pizza-pull.webp"), b: sh("sh-cheers.webp"), gap: "lg" },
+      { t: "pair", a: sh("sh-iced-coffee.webp"), b: sh("sh-white-wine.webp"), gap: "md" },
       { t: "solo", src: sh("4%20(2).png"), width: "md", align: "center", gap: "lg" },
-      { t: "trio", srcs: [sh("1.png"), sh("DSC01563.jpg"), sh("DSC00879.jpg")], gap: "md" },
-      { t: "solo", src: sh("DSC06805.jpg"), width: "sm", align: "right", gap: "lg" },
+      { t: "trio", srcs: [sh("sh-shots.webp"), sh("sh-two-cocktails.webp"), sh("sh-sunset-wine.webp")], gap: "lg" },
+      { t: "trio", srcs: [sh("1.png"), sh("DSC01563.jpg"), sh("DSC00879.jpg")], gap: "lg" },
+      { t: "pair", a: sh("sh-espresso-martini.webp"), b: sh("sh-birthday-wall.webp"), gap: "md" },
+      { t: "pair", a: sh("sh-mat-unrolled.jpg"), b: sh("DSC06805.jpg"), gap: "lg" },
     ],
   },
 
@@ -236,27 +260,41 @@ const LAYOUTS: Record<string, Layout> = {
   // what was done; breakfast large with the oven small; the cheesecake
   // under the bougainvillea edge to edge, the garden's colour at full
   // size; the lattice tarts beside the chocolate cake; the savoury tart
-  // small to close.
+  // small to close. The films sit between: the two from the workshop after
+  // the oven, the three from the café after the cakes.
   "turta-home-cafe": {
     hero: { kind: "bleed", src: turta("turta-01-signature.jpg"), pos: "50% 55%", titleAt: "top" },
     blocks: [
       { t: "notes", src: turta("turta-06-facade.jpg"), side: "left", gap: "lg" },
       { t: "offset", big: turta("turta-02-morning.jpg"), small: turta("turta-03-oven.jpg"), gap: "lg" },
+      { t: "reels", srcs: [turta("turta-atolye-1.mp4"), turta("turta-atolye-2.mp4")], gap: "lg" },
       { t: "solo", src: turta("turta-07-cheesecake.webp"), width: "md", align: "center", gap: "lg" },
       { t: "pair", a: turta("turta-08-lattice.webp"), b: turta("turta-05-chocolate.jpg"), gap: "md" },
+      { t: "reels", srcs: [turta("turta-reel-1.mp4"), turta("turta-reel-2.mp4"), turta("turta-reel-3.mp4")], gap: "lg" },
       { t: "solo", src: turta("turta-04-table.jpg"), width: "sm", align: "right", gap: "md" },
     ],
   },
 
   // Gold letters on white marble: the paper half. Then the counter in a
-  // row of three, the meze bowl large with the two to go small, the name,
-  // and the drip beside the picnic bag to close.
+  // row of three, the film from behind it between two bowls held up, the
+  // meze bowl large with the two to go small, the picnic in a pair, the
+  // name, the five menu cards as one strip, the three posters, and the
+  // drip beside the picnic bag to close. Every new file is 1080px or
+  // less, so none of them goes edge to edge.
   "villa-meze": {
     hero: { kind: "split", src: vm("vm-01-sign.jpg"), side: "left", tone: "paper" },
     blocks: [
       { t: "trio", srcs: [vm("vm-02-cigkofte.jpg"), vm("vm-03-potatoes.jpg"), vm("vm-05-tray.jpg")], gap: "lg" },
+      { t: "trio", srcs: [vm("vm-13-plant-bowl.jpg"), vm("vm-reel-3.mp4"), vm("vm-12-sarma.webp")], gap: "lg" },
       { t: "offset", big: vm("vm-07-meze-bowl.jpg"), small: vm("vm-04-bowls.jpg"), gap: "lg" },
+      { t: "pair", a: vm("vm-10-picnic-bowl.webp"), b: vm("vm-11-spoon.jpg"), gap: "md" },
       { t: "word", gap: "lg" },
+      {
+        t: "reels",
+        srcs: [vm("vm-16-rus.jpg"), vm("vm-17-girit.jpg"), vm("vm-18-irlanda.jpg"), vm("vm-19-cesit.jpg"), vm("vm-20-atom.jpg")],
+        gap: "lg",
+      },
+      { t: "trio", srcs: [vm("vm-09-poster-sofra.jpg"), vm("vm-14-poster-plan.jpg"), vm("vm-15-poster-bowl.jpg")], gap: "lg" },
       { t: "pair", a: vm("vm-06-drip.jpg"), b: vm("vm-08-bag.jpg"), gap: "lg" },
     ],
   },

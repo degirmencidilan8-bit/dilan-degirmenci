@@ -37,15 +37,17 @@ export const colophons: Record<string, Colophon> = {
     output:
       "A series of motion-led social content for launches, milestones and brand communication.",
   },
+  // contribution and output widened to take in the films (2026-11-03):
+  // the video sentences were written by Claude, at Batu's request.
   soulhaus: {
     location: "Ankara",
     short: "From the first stretch to the last call.",
     brief:
       "Capture Soulhaus through the different moments of its day, from the space itself to its social atmosphere.",
     contribution:
-      "We photographed the venue, drinks, people and in-between moments with a natural, editorial eye.",
+      "We photographed the venue, drinks, people and in-between moments with a natural, editorial eye, and filmed the same day in short vertical pieces: the matcha whisked, the hammock class, the bar at last light, dinner by the fire.",
     output:
-      "A photo library covering the space, lifestyle and hospitality sides of Soulhaus.",
+      "A photo library covering the space, lifestyle and hospitality sides of Soulhaus, and a set of short films cut for social, from morning to the private room at night.",
   },
   "freya-gurme": {
     location: "Ankara",

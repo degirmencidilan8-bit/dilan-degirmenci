@@ -19,7 +19,7 @@ Sitedeki tüm markalar. Her biri için sitede kullanılan alanlar:
 | # | Marka | Yıl | Ne yapıldı (sitede yazan) | Ajans | Metin |
 |---|---|---|---|---|---|
 | 1 | KHAM APOTHECARY | 2026 | Photography, Video, Art Direction | | ✅ |
-| 2 | SOULHAUS | 2026 | Photography, Content | | ✅ |
+| 2 | SOULHAUS | 2026 | Photography, Video, Content | | ✅ |
 | 3 | FREYA GURME | 2026 | Photography, Video, Content | | ✅ |
 | 4 | HAPPY PILATES | 2026 | Photography, Video, Content | | ✅ |
 | 5 | GLASS APP | 2026 | Motion Design, Editing | | ✅ |

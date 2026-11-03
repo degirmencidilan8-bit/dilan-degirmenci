@@ -34,7 +34,7 @@ export const projects: Project[] = [
     title: "SOULHAUS",
     slug: "soulhaus",
     year: "2026",
-    disciplines: ["Photography", "Content"],
+    disciplines: ["Photography", "Video", "Content"],
     description: "",
     // Curated from the real SOULHAUS set (12 files): 10 used, 21.png and
     // DSC06925.jpg left out — see the exhibition wall config in walls.ts.
@@ -58,6 +58,31 @@ export const projects: Project[] = [
       { src: "/media/soulhaus/DSC01563.jpg", ratio: "3:4", kind: "image", size: "wide", caption: "Long table, candlelight" },
       { src: "/media/soulhaus/DSC00879.jpg", ratio: "2:3", kind: "image", size: "wide", caption: "A wish" },
       { src: "/media/soulhaus/DSC07837.JPG", ratio: "2:3", kind: "image", size: "wide", caption: "Champagne and pearls" },
+      // Added 2026-11-03 from Batu. Captions written by Claude, from what
+      // each film shows.
+      { src: "/media/soulhaus/sh-matcha-latte.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Whisked, poured, iced: the matcha latte", poster: "/media/soulhaus/sh-matcha-latte-still.jpg" },
+      { src: "/media/soulhaus/sh-hammock-yoga.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Hammock yoga, hanging still", poster: "/media/soulhaus/sh-hammock-yoga-still.jpg" },
+      { src: "/media/soulhaus/sh-photographs.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Photographs under the shadow of the palms", poster: "/media/soulhaus/sh-photographs-still.jpg" },
+      { src: "/media/soulhaus/sh-cugi-3.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "From the door to the terrace, as the sun goes", poster: "/media/soulhaus/sh-cugi-3-still.jpg" },
+      { src: "/media/soulhaus/sh-cugi-1.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Last light on the bar, a glass set down", poster: "/media/soulhaus/sh-cugi-1-still.jpg" },
+      { src: "/media/soulhaus/sh-cugi-2.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Pizza, cut and torn on the paper", poster: "/media/soulhaus/sh-cugi-2-still.jpg" },
+      { src: "/media/soulhaus/sh-fire.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Wine and grapes by the fire", poster: "/media/soulhaus/sh-fire-still.jpg" },
+      // Thirteen more photographs, added 2026-11-03 from Batu, all 1080px:
+      // captions written by Claude, from what each shows.
+      { src: "/media/soulhaus/sh-raised-glass.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Raised to the trees" },
+      { src: "/media/soulhaus/sh-dried-lime.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Dried lime on ice, on the terrace" },
+      { src: "/media/soulhaus/sh-red-sour.webp", ratio: "4:5", kind: "image", size: "wide", caption: "A red sour with dried citrus" },
+      { src: "/media/soulhaus/sh-pizza-pull.webp", ratio: "4:5", kind: "image", size: "wide", caption: "The first slice, still pulling" },
+      { src: "/media/soulhaus/sh-cheers.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Red and white, over the pizza" },
+      { src: "/media/soulhaus/sh-iced-coffee.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Iced coffee on a book, last sun" },
+      { src: "/media/soulhaus/sh-white-wine.webp", ratio: "4:5", kind: "image", size: "wide", caption: "White wine by the window" },
+      { src: "/media/soulhaus/sh-shots.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Four shots, salt and lime" },
+      { src: "/media/soulhaus/sh-two-cocktails.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Basil and lemon, glasses together" },
+      { src: "/media/soulhaus/sh-sunset-wine.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Held up to the sunset" },
+      { src: "/media/soulhaus/sh-espresso-martini.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Espresso martini in a slant of light" },
+      { src: "/media/soulhaus/sh-birthday-wall.webp", ratio: "4:5", kind: "image", size: "wide", caption: "The birthday wall, by candlelight" },
+      { src: "/media/soulhaus/sh-mat-unrolled.jpg", ratio: "2:3", kind: "image", size: "wide", caption: "The mat, unrolled" },
+      { src: "/media/soulhaus/sh-vip-room.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "The private room, set and waiting", poster: "/media/soulhaus/sh-vip-room-still.jpg" },
     ],
     credits: [],
     featured: true,
@@ -185,6 +210,22 @@ export const projects: Project[] = [
         size: "wide",
         caption: "In conversation",
       },
+      // Added 2026-11-03. Captions written by Claude at Batu's request,
+      // from what each film shows.
+      {
+        src: "/media/kham/kham_nese_21.mp4",
+        ratio: "9:16",
+        kind: "video",
+        size: "wide",
+        caption: "A leaf folds into glass, and NO.21 NEŞE is lit",
+      },
+      {
+        src: "/media/kham/kham_gunes_22.mp4",
+        ratio: "9:16",
+        kind: "video",
+        size: "wide",
+        caption: "Cinnamon, clove, frankincense, orange: NO.22 GÜNEŞ, note by note",
+      },
     ],
     // Hand-composed spread — the actual page layout. See EditorialSpread.
     // Rhythm: large inset open (L) → smaller, tucked close beneath it (R)
@@ -298,6 +339,9 @@ export const projects: Project[] = [
       { src: "/media/happypilates/10.png", ratio: "2:3", kind: "image", size: "wide", caption: "Reformer, arms overhead" },
       // Added 2026-10-24, sent for the opening reel.
       { src: "/media/happypilates/hp-reformer-split.webp", ratio: "2:3", kind: "image", size: "wide", caption: "One leg to the ceiling, on the reformer" },
+      // Added 2026-11-03 from Batu, set behind the name. Caption written by
+      // Claude, from what the film shows.
+      { src: "/media/happypilates/hp-joseph-pilates.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Joseph Pilates then, the reformer now", poster: "/media/happypilates/hp-joseph-pilates-still.jpg" },
       { src: "/media/happypilates/Happy_Ak%C4%B1m3.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Flow, with a flower opening" },
       { src: "/media/happypilates/training1.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Training" },
       { src: "/media/happypilates/happypilates_sorucevap_1.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Pilates, in conversation" },
@@ -416,6 +460,22 @@ export const projects: Project[] = [
       { src: "/media/villa-meze/vm-06-drip.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "Sauce, mid-drip" },
       { src: "/media/villa-meze/vm-07-meze-bowl.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "A meze bowl on the grass" },
       { src: "/media/villa-meze/vm-08-bag.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "Packed for a picnic" },
+      // Added 2026-11-03 from Batu. The menu cards and the posters are
+      // captioned with the words printed on them; the photographs with
+      // what they show, written by Claude.
+      { src: "/media/villa-meze/vm-reel-3.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Behind the counter", poster: "/media/villa-meze/vm-reel-3-still.jpg" },
+      { src: "/media/villa-meze/vm-10-picnic-bowl.webp", ratio: "2:3", kind: "image", size: "wide", caption: "A full bowl on the gingham" },
+      { src: "/media/villa-meze/vm-11-spoon.jpg", ratio: "2:3", kind: "image", size: "wide", caption: "One spoonful, on the knee" },
+      { src: "/media/villa-meze/vm-12-sarma.webp", ratio: "9:16", kind: "image", size: "wide", caption: "Sarma and sour cherries, held in the light" },
+      { src: "/media/villa-meze/vm-13-plant-bowl.jpg", ratio: "2:3", kind: "image", size: "wide", caption: "Four mezes, one bowl, held up to the window" },
+      { src: "/media/villa-meze/vm-16-rus.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "Special Rus" },
+      { src: "/media/villa-meze/vm-17-girit.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "Fesleğenli Girit" },
+      { src: "/media/villa-meze/vm-18-irlanda.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "İrlanda" },
+      { src: "/media/villa-meze/vm-19-cesit.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "+34 Çeşit" },
+      { src: "/media/villa-meze/vm-20-atom.jpg", ratio: "4:5", kind: "image", size: "wide", caption: "Patlıcanlı Atom" },
+      { src: "/media/villa-meze/vm-09-poster-sofra.jpg", ratio: "9:16", kind: "image", size: "wide", caption: "Sofranın son dokunuşu hazır." },
+      { src: "/media/villa-meze/vm-14-poster-plan.jpg", ratio: "9:16", kind: "image", size: "wide", caption: "Günün Planı: Villa Meze" },
+      { src: "/media/villa-meze/vm-15-poster-bowl.jpg", ratio: "9:16", kind: "image", size: "wide", caption: "Meze Bowl" },
     ],
     credits: [],
     featured: true,
@@ -604,6 +664,13 @@ export const projects: Project[] = [
       // Added 2026-10-24.
       { src: "/media/turta/turta-07-cheesecake.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Cheesecake under the bougainvillea" },
       { src: "/media/turta/turta-08-lattice.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Lattice tarts on the tray" },
+      // Added 2026-11-03 from Batu. Captions written by Claude, from what
+      // each film shows.
+      { src: "/media/turta/turta-atolye-1.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Christmas doors, iced by hand", poster: "/media/turta/turta-atolye-1-still.jpg" },
+      { src: "/media/turta/turta-atolye-2.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Choux, piped and filled for the season", poster: "/media/turta/turta-atolye-2-still.jpg" },
+      { src: "/media/turta/turta-reel-1.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Out of the oven, onto the table with tea", poster: "/media/turta/turta-reel-1-still.jpg" },
+      { src: "/media/turta/turta-reel-2.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "The first forkful", poster: "/media/turta/turta-reel-2-still.jpg" },
+      { src: "/media/turta/turta-reel-3.mp4", ratio: "9:16", kind: "video", size: "wide", caption: "Chocolate, pistachio, and the chef who made it", poster: "/media/turta/turta-reel-3-still.jpg" },
     ],
     credits: [],
     featured: true,
