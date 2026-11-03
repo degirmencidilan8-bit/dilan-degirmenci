@@ -148,23 +148,27 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // The black-and-white film carries the name through it: Joseph Pilates
-  // then, the studio now, the title negative across it. After it, the
-  // studio and what was done; the dancer on the dark ground, small; the
-  // films; three of the class; the trophies against the black-and-white.
+  // Set like Holiday Inn: the name as wide as the page, the four films
+  // straight under it as one strip (Joseph Pilates then, the studio now,
+  // first), then the studio beside what was done. A vertical film in the
+  // middle of a wide screen was a narrow strip with the name over its
+  // subtitles. Then the dancer small, three of the class, the trophies.
   "happy-pilates": {
-    // The film's own subtitles run across its middle: the name crosses
-    // lower, clear of them.
-    hero: { kind: "cross", src: hp("hp-joseph-pilates.mp4"), titleY: 72 },
+    hero: { kind: "type" },
     blocks: [
-      { t: "notes", src: hp("DSC07748.jpg"), side: "left", gap: "lg" },
-      // 1023px wide: shown small.
-      { t: "solo", src: hp("3.png"), width: "sm", align: "left", gap: "md" },
       {
         t: "reels",
-        srcs: [hp("Happy_Ak%C4%B1m3.mp4"), hp("training1.mp4"), hp("happypilates_sorucevap_1.mp4")],
-        gap: "lg",
+        srcs: [
+          hp("hp-joseph-pilates.mp4"),
+          hp("Happy_Ak%C4%B1m3.mp4"),
+          hp("training1.mp4"),
+          hp("happypilates_sorucevap_1.mp4"),
+        ],
+        gap: "md",
       },
+      { t: "notes", src: hp("DSC07748.jpg"), side: "right", gap: "lg" },
+      // 1023px wide: shown small.
+      { t: "solo", src: hp("3.png"), width: "sm", align: "left", gap: "lg" },
       { t: "trio", srcs: [hp("4.png"), hp("6.png"), hp("10.png")], gap: "lg" },
       { t: "offset", big: hp("12.png"), small: hp("2.png"), flip: true, gap: "lg" },
       { t: "solo", src: hp("hp-reformer-split.webp"), width: "md", align: "right", gap: "lg" },
@@ -275,19 +279,21 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // Gold letters on white marble: the paper half. Then the counter in a
+  // The meze bowl on the red gingham in low sun opens it, on the paper
+  // half: the warmest, most colourful frame in the set (the sign it
+  // replaced only repeated the name beside it). Then the counter in a
   // row of three, the film from behind it between two bowls held up, the
-  // meze bowl large with the two to go small, the picnic in a pair, the
-  // name, the five menu cards as one strip, the three posters, and the
-  // drip beside the picnic bag to close. Every new file is 1080px or
+  // meze bowl large with the two to go small, the spoon beside the sign,
+  // the name, the five menu cards as one strip, the three posters, and
+  // the drip beside the picnic bag to close. Every file is 1080px or
   // less, so none of them goes edge to edge.
   "villa-meze": {
-    hero: { kind: "split", src: vm("vm-01-sign.jpg"), side: "left", tone: "paper" },
+    hero: { kind: "split", src: vm("vm-10-picnic-bowl.webp"), side: "left", tone: "paper", pos: "50% 55%" },
     blocks: [
       { t: "trio", srcs: [vm("vm-02-cigkofte.jpg"), vm("vm-03-potatoes.jpg"), vm("vm-05-tray.jpg")], gap: "lg" },
       { t: "trio", srcs: [vm("vm-13-plant-bowl.jpg"), vm("vm-reel-3.mp4"), vm("vm-12-sarma.webp")], gap: "lg" },
       { t: "offset", big: vm("vm-07-meze-bowl.jpg"), small: vm("vm-04-bowls.jpg"), gap: "lg" },
-      { t: "pair", a: vm("vm-10-picnic-bowl.webp"), b: vm("vm-11-spoon.jpg"), gap: "md" },
+      { t: "pair", a: vm("vm-11-spoon.jpg"), b: vm("vm-01-sign.jpg"), gap: "md" },
       { t: "word", gap: "lg" },
       {
         t: "reels",
@@ -310,10 +316,12 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // One photograph and four reels: the tray takes half the screen beside
-  // the name and the agency, and the reels run as one strip.
+  // The work here is the cinematography, so the films lead. The name as
+  // wide as the page (in the half-screen opening it had to shrink to fit
+  // and could not be read), the four reels straight under it as one
+  // strip, then the breakfast tray beside what the studio did.
   "holiday-inn-kavaklidere": {
-    hero: { kind: "split", src: hi("breakfast-tray.jpg"), side: "left", tone: "ink" },
+    hero: { kind: "type" },
     blocks: [
       {
         t: "reels",
@@ -323,8 +331,9 @@ const LAYOUTS: Record<string, Layout> = {
           hi("HOLIDAY_HAZIRAN_REEL6.mp4"),
           hi("HOLIDAY_HAZIRAN_REEL10.mp4"),
         ],
-        gap: "lg",
+        gap: "md",
       },
+      { t: "notes", src: hi("breakfast-tray.jpg"), side: "right", gap: "lg" },
     ],
   },
 
@@ -399,13 +408,13 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // G9 opens on an hourglass in the dark — the reference's circle, found
-  // in the film itself. The name crosses at its neck; the other two films
-  // follow.
+  // Set like Holiday Inn: the name as wide as the page, the three teasers
+  // side by side under it (G9, the hourglass, first), then what they were
+  // for, in words alone. The name no longer runs over the tagline.
   "goat-villas": {
-    hero: { kind: "cross", src: goat("G9.mp4"), titleY: 52 },
+    hero: { kind: "type" },
     blocks: [
-      { t: "reels", srcs: [goat("G7.mp4"), goat("G3.mp4")], gap: "lg" },
+      { t: "reels", srcs: [goat("G9.mp4"), goat("G7.mp4"), goat("G3.mp4")], gap: "md" },
       { t: "notes", gap: "lg" },
     ],
   },

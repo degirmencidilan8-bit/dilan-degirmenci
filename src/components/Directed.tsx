@@ -434,10 +434,10 @@ function BlockView({
           <div className={right ? "md:col-span-5 md:col-start-8 md:row-start-1" : "md:col-span-5"}>
             <Shot m={m} sizes="(max-width: 768px) 92vw, 33rem" />
           </div>
+          {/* The one-line description is not repeated here: the cross, bleed
+              and type openings already carry it, and split pages put their
+              notes in the opening instead of a block. */}
           <div className={right ? "md:col-span-6 md:col-start-1 md:row-start-1" : "md:col-span-6 md:col-start-7"}>
-            {colophon.short ? (
-              <p className="mb-10 max-w-[24ch] text-2xl font-light leading-snug md:text-3xl">{colophon.short}</p>
-            ) : null}
             <Notes colophon={colophon} />
           </div>
         </div>
