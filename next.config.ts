@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Lets a phone on the same Wi-Fi open the dev server by the computer's
+  // address (http://192.168.x.x:3000). Development only.
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
   images: {
     // Every next/image is answered from the derivatives scripts/images.mjs
     // builds, not from the on-demand optimizer. See src/lib/image-loader.ts.

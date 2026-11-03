@@ -2,23 +2,21 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { Amp } from "@/components/Corners";
-import { INK } from "@/data/palette";
 
 // The cut between pages is a film burn, and it burns like paper: the old
 // page catches in the middle and a hole burns outward through it, ragged,
-// a white-hot edge and a charred ring running ahead of it, the burn — red
-// in some places, electric blue in others, violet where they meet, a cool
-// white where hottest — filling the hole until it fills the frame. There
-// the studio's mark, D&B, is pressed into it in ink, the new page is put
-// under it, and the burn itself catches in the middle and burns open the
-// same way onto the new page, through the mark first. Hairline scratches
-// run down the frame while it burns, and it flickers at film's 24 frames a
-// second. Every burn is a little different.
+// a hard bright edge running ahead of it. What the burn leaves is the page
+// in negative, black and white, the way the names are set over the
+// pictures: the page drains of colour, and inside the hole it is turned
+// over, wholly where it burns hottest, half where it is thin, until the
+// whole frame is a negative. There the new page is put under it, and the
+// negative catches in the middle and burns open the same way onto the new
+// page, the colour coming back as it goes. Hairline scratches run down
+// the frame while it burns, and it flickers at film's 24 frames a second.
+// Every burn is a little different.
 //
 // It is shot on film, not drawn: grain in two layers, the frame weaving in
-// the gate, colour fringes at the edges, dust, and highlights that roll
-// off rather than clip.
+// the gate, and dust.
 //
 // One fragment shader on a raw WebGL canvas over everything, drawn at two
 // thirds of the screen's resolution and only while a burn is running; the
@@ -70,16 +68,12 @@ float fbm(vec2 p) {
   return s;
 }
 
-// The burn's colour: black, through its hue — the safelight red in some
-// places, an electric blue in others, violet where they meet — to a cool
-// white where it burns hottest. h is 0 for red, 1 for blue.
-vec3 ramp(float b, float h) {
-  vec3 hue = mix(vec3(0.86, 0.02, 0.1), vec3(0.08, 0.24, 1.0), h);
-  vec3 c = mix(vec3(0.0), hue * 0.5, smoothstep(0.0, 0.3, b));
-  c = mix(c, hue, smoothstep(0.25, 0.6, b));
-  c = mix(c, mix(hue, vec3(0.97, 0.97, 1.0), 0.4), smoothstep(0.6, 1.0, b));
-  c = mix(c, vec3(0.97, 0.97, 1.0), smoothstep(1.05, 1.6, b));
-  return c;
+// How far the burn turns the page to its negative: not at all where it has
+// not caught, half where it is thin, wholly where it burns hottest. The
+// canvas is laid over the page by difference, so white here is the page
+// inverted and black is the page as it was.
+float ramp(float b) {
+  return 0.55 * smoothstep(0.04, 0.4, b) + 0.45 * smoothstep(0.45, 1.0, b);
 }
 
 // How burnt the film is at a point, for a frame's flicker-scaled amount.
@@ -102,26 +96,18 @@ void main() {
   vec2 weave = (vec2(hash(vec2(frame, 1.7)), hash(vec2(frame, 4.3))) - 0.5) * vec2(0.006, 0.01) * amt;
   vec2 p = uv + weave;
 
-  // Where the burn runs red and where blue: broad zones, sharpened so each
-  // reads as its own colour, drifting the other way to the burn.
-  float h = smoothstep(0.35, 0.65, fbm(p * vec2(1.4, 0.9) - seed * 0.7 + vec2(-t * 0.25, t * 0.4)));
-
-  // Each colour layer of the stock sits a hair apart: fringes at the edges.
-  vec2 split = dir * 0.006 * a;
   float b = burnAt(p, a);
-  vec3 c = vec3(ramp(burnAt(p + split, a), h).r, ramp(b, h).g, ramp(burnAt(p - split, a), h).b);
+  vec3 c = vec3(ramp(b));
 
-  // The burn front chars: a dark seam where the film has only just caught.
+  // Where the film has only just caught the negative hesitates: a seam
+  // where the page shows through as it was.
   float seam = smoothstep(0.1, 0.2, b) * (1.0 - smoothstep(0.22, 0.36, b));
-  c *= 1.0 - 0.55 * seam;
+  c *= 1.0 - 0.45 * seam;
 
-  // Highlights roll off the way film's do, rather than clipping flat.
-  c = 1.0 - exp(-c * 1.5);
-
-  // Hairline scratches, light, jumping every few frames.
+  // Hairline scratches, jumping every few frames.
   float col = floor(p.x * 420.0);
   float scratch = step(0.996, hash(vec2(col, floor(frame / 3.0) + seed)));
-  c += vec3(0.92, 0.94, 1.0) * scratch * a * 0.55 * (0.6 + 0.4 * noise(vec2(col, p.y * 30.0 + frame)));
+  c += scratch * a * 0.55 * (0.6 + 0.4 * noise(vec2(col, p.y * 30.0 + frame)));
 
   // Dust: a handful of dark specks, new every frame, round and of
   // different sizes, each somewhere loose in its own cell of the frame.
@@ -163,16 +149,12 @@ void main() {
   c *= region;
   alpha *= region;
 
-  // The charred ring on the side still to burn, and the glowing edge where
-  // it is burning now: white-hot at the line, the burn's own hue round it.
-  float charRing = smoothstep(0.0, 0.008, x) * (1.0 - smoothstep(0.025, 0.07, x));
-  c = mix(c, vec3(0.03, 0.02, 0.02), charRing * 0.92);
-  alpha = max(alpha, charRing * 0.92);
+  // The edge where it is burning now: a hard line of full negative, and
+  // round it a halo half turned, so the front reads on any page.
   float flick = 0.75 + 0.25 * hash(vec2(frame, seed + 2.0));
   float core = exp(-pow(x / 0.006, 2.0)) * flick;
-  float glow = exp(-pow(x / 0.035, 2.0)) * 0.55 * flick;
-  vec3 hue = mix(vec3(0.86, 0.02, 0.1), vec3(0.08, 0.24, 1.0), h);
-  c += vec3(1.0, 0.97, 0.92) * core + mix(hue, vec3(1.0), 0.35) * glow;
+  float glow = exp(-pow(x / 0.035, 2.0)) * 0.5 * flick;
+  c = max(c, vec3(core + glow));
   alpha = max(alpha, max(core, glow));
 
   o = vec4(clamp(c, 0.0, 1.0), clamp(alpha, 0.0, 1.0));
@@ -184,8 +166,8 @@ const IN_MS = 520;
 const OUT_MS = 1150;
 /** If the new page is slow to come, burn out anyway after this long. */
 const HOLD_MAX_MS = 2500;
-/** The burn holds at full at least this long, so the mark is seen. */
-const HOLD_MIN_MS = 350;
+/** The burn holds at full at least this long, a beat of pure negative. */
+const HOLD_MIN_MS = 180;
 
 function ramp(x: number, a: number, b: number) {
   return Math.max(0, Math.min(1, (x - a) / (b - a)));
@@ -200,8 +182,8 @@ export function FilmBurn() {
   // The running burn, shared by the click handler, the route change and
   // the draw loop.
   const burn = useRef({ phase: "idle" as Phase, at: 0, from: 0, amt: 0, peak: 0 });
-  const mark = useRef<HTMLDivElement>(null);
   const grain = useRef<HTMLDivElement>(null);
+  const mono = useRef<HTMLDivElement>(null);
   const kick = useRef<() => void>(() => {});
   const first = useRef(true);
 
@@ -259,7 +241,8 @@ export function FilmBurn() {
     // the page inside). The burn itself is hottest at the hold.
     let reach = 0;
     let opening = 0;
-    let m = 0;
+    // How far the page under the burn is drained of colour.
+    let gray = 0;
 
     const draw = (now: number) => {
       const b = burn.current;
@@ -270,7 +253,7 @@ export function FilmBurn() {
         reach = Math.pow(k, 1.4);
         opening = 0;
         b.amt = b.from + (1 - b.from) * (0.65 + 0.35 * k);
-        m = ramp(k, 0.75, 1);
+        gray = ramp(k, 0, 0.6);
         if (k >= 1) {
           b.phase = "hold";
           b.at = now;
@@ -280,25 +263,25 @@ export function FilmBurn() {
         b.amt = 1;
         reach = 1;
         opening = 0;
-        m = 1;
+        gray = 1;
         if (dt > HOLD_MAX_MS) {
           b.phase = "out";
           b.at = now;
           b.from = 1;
         }
       } else if (b.phase === "out") {
-        // A start in the future is the hold at full, for the mark.
+        // A start in the future is the hold at full.
         const k = Math.max(0, Math.min(1, dt / OUT_MS));
         reach = Math.pow(k, 1.15);
         opening = dt >= 0 ? 1 : 0;
         if (!opening) reach = 1;
         b.amt = b.from * (1 - 0.35 * k);
-        // The hole burns through the mark first: it is in the middle.
-        m = opening ? 1 - ramp(reach, 0.02, 0.16) : 1;
+        // Colour comes back into the new page as the negative burns off it.
+        gray = opening ? 1 - ramp(reach, 0.15, 0.85) : 1;
         if (k >= 1) {
           b.phase = "idle";
           b.amt = 0;
-          m = 0;
+          gray = 0;
         }
       }
 
@@ -310,21 +293,17 @@ export function FilmBurn() {
       gl.uniform1f(uOpening, opening);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-      // The mark: comes together as the burn closes over the frame,
-      // flickers with the film, and is burnt through as the frame opens.
       if (grain.current) grain.current.style.opacity = (b.amt * 0.35).toFixed(3);
-      const mk = mark.current;
-      if (mk) {
-        const flicker = 0.86 + 0.14 * Math.abs(Math.sin(Math.floor((now - born) / (1000 / 24)) * 12.9898) % 1);
-        mk.style.opacity = (m * flicker).toFixed(3);
-        mk.style.setProperty("--m", (1 - Math.pow(1 - m, 3)).toFixed(4));
-      }
+      if (mono.current) mono.current.style.opacity = gray.toFixed(3);
 
       if (b.phase === "idle") {
         running = false;
         el.style.visibility = "hidden";
-        if (mk) mk.style.opacity = "0";
         if (grain.current) grain.current.style.opacity = "0";
+        if (mono.current) {
+          mono.current.style.opacity = "0";
+          mono.current.style.visibility = "hidden";
+        }
         return;
       }
       raf = requestAnimationFrame(draw);
@@ -340,6 +319,7 @@ export function FilmBurn() {
       gl.uniform2f(uDir, Math.cos(a), Math.sin(a));
       size();
       el.style.visibility = "visible";
+      if (mono.current) mono.current.style.visibility = "visible";
       raf = requestAnimationFrame(draw);
     };
 
@@ -389,7 +369,7 @@ export function FilmBurn() {
     const now = performance.now();
     if (b.phase === "in" || b.phase === "hold") {
       b.from = 1;
-      // Hold at full for a moment once full is reached, so the mark lands.
+      // Hold at full for a moment once full is reached.
       const peak = b.phase === "hold" ? b.peak : b.at + IN_MS;
       b.phase = "out";
       b.at = Math.max(now, peak + HOLD_MIN_MS);
@@ -404,43 +384,22 @@ export function FilmBurn() {
 
   return (
     <>
+      {/* The page goes to black and white under the burn, so the burn's
+          negative is a black-and-white one, like the names set over the
+          pictures. */}
+      <div
+        ref={mono}
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[299] backdrop-grayscale"
+        style={{ opacity: 0, visibility: "hidden" }}
+      />
       <canvas
         ref={canvas}
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-[300] h-full w-full"
+        className="pointer-events-none fixed inset-0 z-[300] h-full w-full mix-blend-difference"
         style={{ visibility: "hidden" }}
       />
-      {/* D&B, set like the name — narrow and heavy, the ampersand light and
-          wide — pressed into the burn in ink at its brightest. The two
-          letters close in on the ampersand as it grows. */}
-      <div
-        ref={mark}
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-[301] flex items-center justify-center mix-blend-multiply"
-        style={{ opacity: 0, color: INK, ["--m" as string]: "0" }}
-      >
-        <p
-          className="display flex items-center leading-none"
-          style={{
-            fontSize: "clamp(3.5rem, 10vw, 9rem)",
-            filter: "blur(calc((1 - var(--m)) * 6px))",
-            ["--dw" as string]: "62",
-            ["--dg" as string]: "900",
-            ["--dt" as string]: "-0.02em",
-          }}
-        >
-          <span className="inline-block" style={{ transform: "translateX(calc((1 - var(--m)) * -0.35em))" }}>
-            D
-          </span>
-          <span className="inline-block" style={{ transform: "scale(calc(0.55 + var(--m) * 0.45))", opacity: "var(--m)" }}>
-            <Amp />
-          </span>
-          <span className="inline-block" style={{ transform: "translateX(calc((1 - var(--m)) * 0.35em))" }}>
-            B
-          </span>
-        </p>
-      </div>
-      {/* Fine grain over the burn and the mark alike, stepped like the
+      {/* Fine grain over the burn, stepped like the
           darkroom's: the shader's grain is the coarse layer, this the
           fine one. Only there while a burn is. */}
       <div

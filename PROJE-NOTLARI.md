@@ -24,6 +24,10 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 - `npm run dev` çalışırken `npm run build` çalıştırmayın. Gerekirse önce dev
   sunucusunu durdurun.
 - Windows PowerShell'de `npx` betik engeline takılırsa `npx.cmd` kullanın.
+- Telefondan bakmak için: telefon bilgisayarla aynı Wi-Fi'de olsun,
+  `npm run dev` çıktısındaki "Network" adresini (ör. `http://192.168.1.29:3000`)
+  telefonun tarayıcısında açın. Açılmazsa Windows güvenlik duvarında Node.js'e
+  izin verin ya da ağı "Özel" yapın.
 - Batu'nun değişiklikleri `batu-duzenleme` dalına gönderilir, `main`'e değil.
   Dilan inceleyip uygun görürse `main`'e birleştirir (o zaman canlıya çıkar).
   Bu dalın Vercel önizlemesi:
@@ -70,7 +74,7 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 | Tünelin ve Work açılışının arkasındaki ışık perdesi (shader) | `src/components/LightCurtain.tsx` |
 | Work sayfası: kartlar, filtre, GRID / SPHERE seçici (küre: `WorkSphere.tsx`) | `src/components/WorkIndex.tsx` |
 | Work sayfasının açılışındaki çelik diyafram | `src/components/IrisOpening.tsx` |
-| Sayfa geçişlerindeki film yanığı ve D&B mührü (shader) | `src/components/FilmBurn.tsx` |
+| Sayfa geçişlerindeki siyah beyaz negatif film yanığı (shader) | `src/components/FilmBurn.tsx` |
 | 3B fotoğraf malzemesi (BrandTunnel buradan alıyor) ve deneme sayfası `/lab/gallery` | `src/components/ui/3d-gallery-photography.tsx`, `src/app/lab/` |
 | Eski denemeler, sitede kullanılmıyor | `WorkTunnel.tsx`, `Field.tsx`, `WorkGrid.tsx` |
 
