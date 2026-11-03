@@ -41,6 +41,10 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 - **Metin uydurulmaz.** Marka adı, rol, katkı, yıl, açıklama, alıntı: hepsi
   yalnızca Dilan ya da Batu'nun verdiği metinden, kelimesi kelimesine
   kullanılır. Eksik bilgi boş bırakılır ve sorulur.
+- İstisna: Batu bazı fotoğraf ve video altı yazılarını ve Soulhaus'un
+  katkı ve çıktı cümlelerini Claude'a yazdırdı (2026-11-03). Bunlar
+  `projects.ts` ve `colophons.ts` içinde "written by Claude" notuyla
+  işaretli. Dilan isterse değiştirilebilir.
 - Gerçek bir markanın kimliği (logo, yazı tipi, renk sistemi) taklit edilmez.
 - Siteye eklenecek bütün metinlerin listesi ve durumu: `ICERIK.md`.
 - Claude'la çalışırken cevaplar Türkçe olmalı.
@@ -70,9 +74,11 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 | E-posta, Instagram, About metni | `src/data/profile.ts` |
 | Proje başına başlık harfinin ayarı | `src/data/typography.ts` |
 | Sayfalar | `src/app/…` (Next.js App Router) |
-| Ana sayfa: açılıştan sonra ilk 10 markanın bölüm bölüm geldiği tünel (kaç marka: `BRANDS`) | `src/components/BrandTunnel.tsx`, `src/app/page.tsx` |
+| Ana sayfa tüneli: hangi markalar, hangi sırayla, hangisi hangi videoyla gelir (`TUNNEL` listesi) | `src/app/page.tsx` |
+| Tünelin kendisi: 3B geçiş, videolar, soldaki dönen marka listesi | `src/components/BrandTunnel.tsx` |
 | Tünelin ve Work açılışının arkasındaki ışık perdesi (shader) | `src/components/LightCurtain.tsx` |
-| Work sayfası: kartlar, filtre, GRID / SPHERE seçici (küre: `WorkSphere.tsx`) | `src/components/WorkIndex.tsx` |
+| Work sayfası: karartılmış kapaklar ve üstlerindeki marka adları, filtre, GRID / SPHERE seçici (küre: `WorkSphere.tsx`) | `src/components/WorkIndex.tsx` |
+| Fare imleci: dönen diyafram ve tıklanabilir şeyleri çerçeveleyen köşeler | `src/components/Cursor.tsx` |
 | Work sayfasının açılışındaki çelik diyafram | `src/components/IrisOpening.tsx` |
 | Sayfa geçişlerindeki siyah beyaz negatif film yanığı (shader) | `src/components/FilmBurn.tsx` |
 | 3B fotoğraf malzemesi (BrandTunnel buradan alıyor) ve deneme sayfası `/lab/gallery` | `src/components/ui/3d-gallery-photography.tsx`, `src/app/lab/` |
