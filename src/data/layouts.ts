@@ -392,7 +392,8 @@ const LAYOUTS: Record<string, Layout> = {
   // Collages with their own type on them: nothing goes over them. The name
   // first, then the sunset at full width, the poster beside the brief, the
   // four films as a strip (the cup, then the app's three), two collages
-  // side by side, and the padel court edge to edge to close.
+  // side by side to close. (The padel court collage stays in the project
+  // data, off the page.)
   glass: {
     hero: { kind: "type" },
     blocks: [
@@ -410,7 +411,6 @@ const LAYOUTS: Record<string, Layout> = {
         gap: "lg",
       },
       { t: "pair", a: glass("glass-cliff.jpg"), b: glass("glass-bodrum.jpg"), gap: "lg" },
-      { t: "bleed", src: glass("glass-padel.jpg"), gap: "lg" },
     ],
   },
 
