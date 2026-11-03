@@ -49,7 +49,11 @@ export default function Home() {
 
   return (
     <main className="min-h-svh" style={{ background: INK, color: BONE }}>
-      <Opener reel={getReel()} />
+      {/* Above the tunnel, which starts under its last stretch: the
+          tunnel's light shows through the dark around the frame. */}
+      <div className="relative z-10">
+        <Opener reel={getReel()} />
+      </div>
       <BrandTunnel chapters={chapters} />
     </main>
   );

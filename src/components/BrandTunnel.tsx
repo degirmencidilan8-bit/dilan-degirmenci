@@ -65,6 +65,9 @@ const SATS = [
 const PER_CHAPTER = 0.9;
 /** The first chapter is already arriving as the section comes up. */
 const LEAD = 0.6;
+/** How far the tunnel starts under the opening above it, in screen
+ * heights × 100. */
+const OVERLAP = 22;
 /** The drum: degrees between two brands, and its radius in px. */
 const DRUM_STEP = 24;
 const DRUM_R = 96;
@@ -306,6 +309,8 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
   const [near, setNear] = useState(false);
   const [live, setLive] = useState(false);
   const items = useRef<(HTMLButtonElement | null)[]>([]);
+  const dawn = useRef<HTMLDivElement>(null);
+  const seam = useRef<HTMLDivElement>(null);
 
   const sized = useMemo(() => {
     // The chapter's picture fills most of a screen, bent: a fixed 1600 went
@@ -348,6 +353,16 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
     if (!el) return;
     const onScroll = () => {
       const box = el.getBoundingClientRect();
+      // While the tunnel is still coming up under the opening, its top
+      // is held in the dark and the light rises out of it.
+      if (dawn.current) {
+        const k = Math.min(1, Math.max(0, box.top / window.innerHeight));
+        const e = Math.min(1, k * 1.8);
+        dawn.current.style.opacity = (e * e * (3 - 2 * e)).toFixed(3);
+      }
+      // The very edge stays dark until it is almost at the top of the
+      // screen, so the light never shows a line where it begins.
+      if (seam.current) seam.current.style.opacity = Math.min(1, (Math.min(1, Math.max(0, box.top / window.innerHeight))) * 14).toFixed(3);
       const run = box.height - window.innerHeight;
       const r = run > 0 ? Math.min(1, Math.max(0, -box.top / run)) : 0;
       progress.current = -LEAD + r * (n - 1 + LEAD);
@@ -390,7 +405,14 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
   const current = chapters[chapter];
 
   return (
-    <section ref={section} aria-label="Work" className="relative" style={{ height: `${(n - 1 + LEAD) * PER_CHAPTER * 100 + 100}svh` }}>
+    <section
+      ref={section}
+      aria-label="Work"
+      className="relative"
+      // Pulled up under the end of the opening, so there is no gap of
+      // plain dark between the two.
+      style={{ height: `${(n - 1 + LEAD) * PER_CHAPTER * 100 + 100}svh`, marginTop: `-${OVERLAP}svh` }}
+    >
       <div className="sticky top-0 h-svh overflow-hidden" style={{ background: INK }} data-cursor={hover ? "" : undefined}>
         <LightCurtain tint={colours[chapter]} className="pointer-events-none absolute inset-0" />
 
@@ -413,6 +435,22 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
           style={{ background: `radial-gradient(ellipse 85% 95% at 50% 25%, transparent 45%, ${INK} 100%)` }}
         />
         <div aria-hidden className="tunnel-grain pointer-events-none absolute inset-0" />
+
+        {/* The seam with the opening above: no edge where the light
+            begins. The top of the tunnel is ground while it comes up, and
+            clears as it reaches the top of the screen. */}
+        <div
+          ref={dawn}
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0"
+          style={{ height: "70%", background: `linear-gradient(to bottom, ${INK} 0%, ${INK}99 30%, transparent 100%)` }}
+        />
+        <div
+          ref={seam}
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0"
+          style={{ height: "22%", background: `linear-gradient(to bottom, ${INK} 0%, ${INK} 20%, transparent 100%)` }}
+        />
 
         {/* The brand's name across its picture, one chapter at a time. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 mix-blend-exclusion" style={{ color: BONE }}>
