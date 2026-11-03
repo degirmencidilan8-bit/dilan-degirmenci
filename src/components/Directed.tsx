@@ -386,7 +386,7 @@ function BlockView({
             style={{ ["--gc" as string]: `${start} / span ${span}` }}
           >
             <Shot m={m} sizes="(max-width: 768px) 80vw, 52rem" />
-            <Caption n={n}>{m.caption}</Caption>
+            {!b.bare && <Caption n={n}>{m.caption}</Caption>}
           </figure>
         </div>
       );
@@ -407,7 +407,7 @@ function BlockView({
           {ms.map((m) => (
             <figure key={m.src}>
               <Shot m={m} sizes="(max-width: 768px) 46vw, 24rem" />
-              <Caption>{m.caption}</Caption>
+              {!b.bare && <Caption>{m.caption}</Caption>}
             </figure>
           ))}
         </div>
@@ -469,7 +469,7 @@ export function Directed({
   film?: Film;
 }) {
   // Small numbers on the captioned frames, counted down the page.
-  const captioned = (b: Block) => b.t === "offset" || b.t === "solo";
+  const captioned = (b: Block) => b.t === "offset" || (b.t === "solo" && !b.bare);
   const counted = layout.blocks.map((_, i) => layout.blocks.slice(0, i + 1).filter(captioned).length);
   return (
     <div>

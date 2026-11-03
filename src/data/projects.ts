@@ -507,8 +507,6 @@ export const projects: Project[] = [
       { src: "/media/efsense-travel/efs-13-gastronomy.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Destinasyonun lezzetle buluştuğu özel yolculuklar." },
       { src: "/media/efsense-travel/efs-14-bali-office.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bali ofisimiz açıldı" },
       { src: "/media/efsense-travel/efs-15-bali.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bali — Tek ada, pek çok yol" },
-      { src: "/media/efsense-travel/efs-16-bali-wellness.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Ruh, Beden ve İçsel Denge" },
-      { src: "/media/efsense-travel/efs-17-bali-culture.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Kültür ve Yerel Deneyimler" },
       { src: "/media/efsense-travel/efs-18-bali-sea.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Deniz, Keşif ve Özgürlük" },
       { src: "/media/efsense-travel/efs-19-congress.webp", ratio: "4:5", kind: "image", size: "wide", caption: "Bir kongrenin akışı, açılış konuşmasında değil, ondan önce verilen kararlarda şekillenir." },
     ],

@@ -662,46 +662,6 @@
    1024
   ]
  },
- "/media/efsense-travel/efs-16-bali-wellness.webp": {
-  "h": "2edc36aab991",
-  "w": 1080,
-  "ht": 1350,
-  "s": [
-   160,
-   320,
-   480,
-   640,
-   1024,
-   1080
-  ],
-  "g": [
-   160,
-   320,
-   480,
-   640,
-   1024
-  ]
- },
- "/media/efsense-travel/efs-17-bali-culture.webp": {
-  "h": "9d2f1e041e26",
-  "w": 1080,
-  "ht": 1350,
-  "s": [
-   160,
-   320,
-   480,
-   640,
-   1024,
-   1080
-  ],
-  "g": [
-   160,
-   320,
-   480,
-   640,
-   1024
-  ]
- },
  "/media/efsense-travel/efs-18-bali-sea.webp": {
   "h": "ed5e51e713d2",
   "w": 1080,

@@ -47,10 +47,11 @@ export type Block = { gap?: Gap } & (
   | { t: "trio"; srcs: [string, string, string] }
   /** One large, one small and lifted, with its caption. */
   | { t: "offset"; big: string; small: string; flip?: boolean }
-  /** One alone, at a chosen width and place. */
-  | { t: "solo"; src: string; width: "sm" | "md" | "lg"; align: "left" | "center" | "right" }
-  /** Vertical films as a strip. */
-  | { t: "reels"; srcs: string[] }
+  /** One alone, at a chosen width and place. `bare` drops the caption,
+   * for posters whose headline is already in the picture. */
+  | { t: "solo"; src: string; width: "sm" | "md" | "lg"; align: "left" | "center" | "right"; bare?: boolean }
+  /** Vertical films as a strip. `bare` drops the captions. */
+  | { t: "reels"; srcs: string[]; bare?: boolean }
   /** A picture beside what the studio was asked and did, numbered; or,
    * with no picture, the words alone. */
   | { t: "notes"; src?: string; side?: "left" | "right" }
@@ -383,38 +384,33 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // Nineteen designed posts, set like Holiday Inn and read as a campaign in
-  // chapters rather than one long feed. The name; the launch as a strip
-  // (the teaser, the first story, the destinations, the door hanger); the
-  // gastronomy frame beside the brief. The name again, then Bali as its
-  // own strip: the office opening and the four-part carousel in order.
-  // The story series in three, the corporate side in three, two sunsets,
-  // and it closes on the question "Sıradaki hikâyeniz?".
+  // Seventeen designed posts read as a campaign in chapters. Every post
+  // carries its own headline, so nothing is captioned twice. The rhythm
+  // never repeats back to back: four, the brief, the name, three for
+  // Bali, two, one to the right, three for the corporate side, two
+  // sunsets, and one in the middle to close on "Sıradaki hikâyeniz?".
   "efsense-travel": {
     hero: { kind: "type" },
     blocks: [
       {
         t: "reels",
         srcs: [efs("efs-10-coming-soon.webp"), efs("efs-01-journey.webp"), efs("efs-11-destinations.webp"), efs("efs-12-door-hanger.webp")],
+        bare: true,
         gap: "md",
       },
       { t: "notes", src: efs("efs-13-gastronomy.webp"), side: "right", gap: "lg" },
       { t: "word", gap: "lg" },
       {
         t: "reels",
-        srcs: [
-          efs("efs-14-bali-office.webp"),
-          efs("efs-15-bali.webp"),
-          efs("efs-16-bali-wellness.webp"),
-          efs("efs-17-bali-culture.webp"),
-          efs("efs-18-bali-sea.webp"),
-        ],
+        srcs: [efs("efs-14-bali-office.webp"), efs("efs-15-bali.webp"), efs("efs-18-bali-sea.webp")],
+        bare: true,
         gap: "lg",
       },
-      { t: "trio", srcs: [efs("efs-03-window.webp"), efs("efs-02-who-we-are.webp"), efs("efs-04-boutique-tours.webp")], gap: "lg" },
+      { t: "pair", a: efs("efs-03-window.webp"), b: efs("efs-02-who-we-are.webp"), gap: "lg" },
+      { t: "solo", src: efs("efs-04-boutique-tours.webp"), width: "sm", align: "right", bare: true, gap: "md" },
       { t: "trio", srcs: [efs("efs-06-mice.webp"), efs("efs-07-impact.webp"), efs("efs-19-congress.webp")], gap: "lg" },
       { t: "pair", a: efs("efs-05-tuscany.webp"), b: efs("efs-08-this-moment.webp"), gap: "lg" },
-      { t: "solo", src: efs("efs-09-next-story.webp"), width: "sm", align: "center", gap: "lg" },
+      { t: "solo", src: efs("efs-09-next-story.webp"), width: "sm", align: "center", bare: true, gap: "lg" },
     ],
   },
 
