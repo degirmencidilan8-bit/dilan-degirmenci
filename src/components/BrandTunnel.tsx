@@ -24,16 +24,27 @@ import { BONE, INK } from "@/data/palette";
 // beautiful in motion and said nothing: thirty small pictures scattered,
 // none held long enough to be seen, none tied to a name.
 //
-// A short list of the brands runs down the left edge as the chapter index;
-// click one to travel there.
+// A short list of the brands runs down the left edge as the chapter index,
+// set on a turning drum: it rolls with the scroll, the current brand large
+// and lit at the front, its neighbours tipping away above and below into
+// the dark, so only a few are ever seen. Click one to travel there.
+//
+// A brand with a film plays it in place of its picture: the picture holds
+// the place (and gives the light its colour) until the film can play, the
+// film is only fetched as its chapter comes near, and it plays only while
+// its chapter is on screen.
 
 export interface Chapter {
   title: string;
   sub: string;
   href: string;
   hero: string;
+  /** A film to play in place of the hero picture. */
+  video?: string;
   sats: string[];
 }
+
+type Film = { el: HTMLVideoElement; tex: THREE.VideoTexture; ready: boolean; playing: boolean };
 
 /** Where a chapter's picture rests: this far in front of the camera. */
 const REST = 6;
@@ -54,6 +65,21 @@ const SATS = [
 const PER_CHAPTER = 0.9;
 /** The first chapter is already arriving as the section comes up. */
 const LEAD = 0.6;
+/** The drum: degrees between two brands, and its radius in px. */
+const DRUM_STEP = 24;
+const DRUM_R = 96;
+
+/** Where a brand sits on the drum, d chapters from the front. */
+function drum(d: number) {
+  const th = Math.max(-90, Math.min(90, d * DRUM_STEP));
+  const c = Math.cos((th * Math.PI) / 180);
+  const y = DRUM_R * Math.sin((th * Math.PI) / 180);
+  return {
+    transform: `translateY(calc(-50% + ${y.toFixed(1)}px)) perspective(520px) rotateX(${(-th).toFixed(1)}deg) scale(${(0.8 + 0.45 * c ** 4).toFixed(3)})`,
+    opacity: Math.abs(th) < 82 ? Math.max(0, c) ** 5 : 0,
+    reachable: Math.abs(th) < 60,
+  };
+}
 
 type Callbacks = {
   onChapter: (k: number) => void;
@@ -85,7 +111,7 @@ function Scene({
   progress,
   callbacks,
 }: {
-  chapters: { hero: string; sats: string[] }[];
+  chapters: { hero: string; video?: string; sats: string[] }[];
   progress: RefObject<number>;
   callbacks: RefObject<Callbacks>;
 }) {
@@ -115,6 +141,39 @@ function Scene({
     callbacks.current?.onColours(layout.slots.map((s) => colourOf(textures[s.hero])));
   }, [layout, textures, callbacks]);
 
+  // The films, one per chapter that has one; nothing is fetched yet.
+  const films = useRef<(Film | null)[]>([]);
+  useEffect(() => {
+    const list = chapters.map((c): Film | null => {
+      if (!c.video) return null;
+      const el = document.createElement("video");
+      el.muted = true;
+      el.loop = true;
+      el.playsInline = true;
+      el.setAttribute("playsinline", "");
+      el.preload = "auto";
+      const tex = new THREE.VideoTexture(el);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const f: Film = { el, tex, ready: false, playing: false };
+      el.addEventListener("loadeddata", () => {
+        f.ready = true;
+      });
+      el.dataset.src = c.video;
+      return f;
+    });
+    films.current = list;
+    return () => {
+      list.forEach((f) => {
+        if (!f) return;
+        f.el.pause();
+        f.el.removeAttribute("src");
+        f.el.load();
+        f.tex.dispose();
+      });
+      films.current = [];
+    };
+  }, [chapters]);
+
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
   const at = useRef(progress.current ?? 0);
   const chapter = useRef(-1);
@@ -140,7 +199,34 @@ function Scene({
       const t = at.current - c;
       const g = settle(t);
       const heroZ = depthOf(g);
-      const ar = aspectOf(textures[slot.hero]);
+
+      // The film: fetched as its chapter comes near, playing while it is on
+      // screen, in place of the picture once it has a frame to show.
+      const film = films.current[c];
+      let ar = aspectOf(textures[slot.hero]);
+      if (film) {
+        if (Math.abs(t) < 2 && !film.el.src) {
+          film.el.src = film.el.dataset.src ?? "";
+          film.el.load();
+        }
+        const on = Math.abs(t) < 1.3;
+        if (on && !film.playing) {
+          film.playing = true;
+          film.el.play().catch(() => {
+            film.playing = false;
+          });
+        } else if (!on && film.playing) {
+          film.playing = false;
+          film.el.pause();
+        }
+        const map = materials[slot.hero].uniforms.map;
+        if (film.ready && film.el.videoWidth) {
+          map.value = film.tex;
+          ar = film.el.videoWidth / film.el.videoHeight;
+        } else {
+          map.value = textures[slot.hero];
+        }
+      }
       // As large as the screen allows: most of its height, most of its width.
       const h = Math.min(0.64 * viewH, (0.82 * viewW) / ar);
 
@@ -214,11 +300,13 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
   const [hover, setHover] = useState(false);
   const [near, setNear] = useState(false);
   const [live, setLive] = useState(false);
+  const items = useRef<(HTMLButtonElement | null)[]>([]);
 
   const sized = useMemo(
     () =>
       chapters.map((c) => ({
         hero: imageLoader({ src: c.hero, width: 1600 }),
+        video: c.video,
         sats: c.sats.map((s) => imageLoader({ src: s, width: 640 })),
       })),
     [chapters],
@@ -267,6 +355,26 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
       seen.disconnect();
     };
   }, [n]);
+
+  // The drum turns with the scroll, eased, written straight to the page.
+  useEffect(() => {
+    if (!live) return;
+    let raf = 0;
+    let a = Math.min(n - 1, Math.max(0, progress.current ?? 0));
+    const tick = () => {
+      a += (Math.min(n - 1, Math.max(0, progress.current ?? 0)) - a) * 0.1;
+      items.current.forEach((el, k) => {
+        if (!el) return;
+        const p = drum(k - a);
+        el.style.transform = p.transform;
+        el.style.opacity = p.opacity.toFixed(3);
+        el.style.pointerEvents = p.reachable ? "auto" : "none";
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [live, n]);
 
   const current = chapters[chapter];
 
@@ -318,21 +426,38 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
           ))}
         </div>
 
-        {/* The index: every brand, the current one lit. */}
-        <nav aria-label="Brands" className="absolute left-5 top-1/2 hidden -translate-y-1/2 flex-col gap-1.5 md:flex" style={{ color: BONE }}>
-          {chapters.map((c, k) => (
-            <button
-              key={c.href}
-              type="button"
-              onClick={() => window.scrollTo({ top: scrollFor(k), behavior: "smooth" })}
-              className="mono flex gap-3 text-left transition-opacity"
-              style={{ fontSize: "0.625rem", opacity: k === chapter ? 1 : 0.32 }}
-            >
-              <span>{String(k + 1).padStart(2, "0")}</span>
-              <span>{c.title}</span>
-            </button>
-          ))}
+        {/* The index: every brand on a drum, the current one at the front.
+            Placed for the first chapter here; the drum turns from then on. */}
+        <nav
+          aria-label="Brands"
+          className="absolute left-5 top-1/2 hidden h-[17rem] w-[13rem] -translate-y-1/2 md:block"
+          style={{
+            color: BONE,
+            maskImage: "linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)",
+          }}
+        >
+          {chapters.map((c, k) => {
+            const p = drum(k);
+            return (
+              <button
+                key={c.href}
+                ref={(el) => {
+                  items.current[k] = el;
+                }}
+                type="button"
+                aria-current={k === chapter ? "true" : undefined}
+                onClick={() => window.scrollTo({ top: scrollFor(k), behavior: "smooth" })}
+                className="mono absolute left-0 top-1/2 flex origin-left gap-3 whitespace-nowrap text-left"
+                style={{ fontSize: "0.625rem", transform: p.transform, opacity: p.opacity }}
+              >
+                <span>{String(k + 1).padStart(2, "0")}</span>
+                <span>{c.title}</span>
+              </button>
+            );
+          })}
         </nav>
+
 
         {/* The chapter's line, and the way in. */}
         <div className="absolute inset-x-0 bottom-20 flex flex-col items-center gap-2 text-center md:bottom-16" style={{ color: BONE }}>
