@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-// Light falling through a curtain: soft vertical shafts, leaning slightly,
-// bright at the top and gone by the bottom, sliding past one another, each
+// Light falling through a curtain: soft vertical shafts, leaning and
+// swaying, bright at the top and gone by the bottom, sliding past one
+// another and breathing, a broad sweep passing across them now and then, each
 // edge split into a thin rainbow the way light fringes through old glass or
 // burnt film. Cool lavender by default, warmed towards `tint` — the colour
 // of the picture in front — so the work still lights its own room.
@@ -38,19 +39,27 @@ float noise(float x) {
 }
 
 // The shafts at one horizontal position: three layers drifting at their
-// own speeds, sharpened so they read as bars rather than haze.
+// own speeds, sharpened so they read as bars rather than haze, each
+// breathing brighter and dimmer on its own, and a broad sweep of light
+// passing across them every few seconds.
 float shafts(float x) {
   float s = 0.0;
-  s += pow(noise(x * 5.0 + t * 0.07), 3.0) * 0.75;
-  s += pow(noise(x * 11.0 - t * 0.11 + 7.3), 4.0) * 0.55;
-  s += pow(noise(x * 23.0 + t * 0.05 + 2.1), 6.0) * 0.35;
+  s += pow(noise(x * 5.0 + t * 0.22), 3.0) * 0.75;
+  s += pow(noise(x * 11.0 - t * 0.34 + 7.3), 4.0) * 0.55;
+  s += pow(noise(x * 23.0 + t * 0.16 + 2.1), 6.0) * 0.35;
+  s *= 0.7 + 0.45 * noise(x * 3.0 + t * 0.6 + 4.0);
+  float sweep = fract(x * 0.16 - t * 0.09) - 0.5;
+  s += exp(-sweep * sweep * 40.0) * 0.32 * (0.6 + 0.4 * noise(x * 9.0 - t));
   return s;
 }
 
 void main() {
-  float y = uv.y;
-  // Lean: the shafts tilt, and sway a little along their length.
-  float x = uv.x * aspect + (1.0 - y) * 0.18 + sin(y * 2.2 + t * 0.3) * 0.015;
+  // The light reaches a little further down, then draws back.
+  float y = uv.y + 0.04 * sin(t * 0.55);
+  // Lean: the shafts tilt, the tilt itself rocking slowly, and they sway
+  // along their length like a curtain in a draught.
+  float x = uv.x * aspect + (1.0 - y) * (0.18 + 0.07 * sin(t * 0.21))
+    + sin(y * 2.6 + t * 0.9) * 0.04 + sin(y * 5.0 - t * 1.3) * 0.012;
 
   // Each channel sampled a hair apart: the rainbow at the edges.
   float r = shafts(x + 0.006);
