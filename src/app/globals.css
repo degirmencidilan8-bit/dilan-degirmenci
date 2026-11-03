@@ -405,3 +405,35 @@ html:has([data-tone="light"]) body {
   75% { background-position: -40px -30px; }
   100% { background-position: 0 0; }
 }
+
+/* The homepage tunnel's room (WorkTunnel): the names drifting behind it,
+   two light leaks breathing at its edges, and its own grain — heavier than
+   the site's skin, stepped like the darkroom's. */
+@keyframes tunnel-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes leak-a {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+  50% { opacity: 0.6; }
+  100% { transform: translate(8vw, 6vh) scale(1.2); opacity: 0.25; }
+}
+@keyframes leak-b {
+  0% { transform: translate(0, 0) scale(1.1); opacity: 0.2; }
+  60% { opacity: 0.45; }
+  100% { transform: translate(-10vw, -5vh) scale(0.9); opacity: 0.3; }
+}
+.tunnel-grain {
+  opacity: 0.09;
+  background-size: 140px 140px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: room-grain 0.9s steps(4) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="tunnel-drift"],
+  [style*="leak-a"],
+  [style*="leak-b"],
+  .tunnel-grain {
+    animation: none !important;
+  }
+}
