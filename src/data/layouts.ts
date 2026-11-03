@@ -279,19 +279,25 @@ const LAYOUTS: Record<string, Layout> = {
     ],
   },
 
-  // The meze bowl on the red gingham in low sun opens it, on the paper
-  // half: the warmest, most colourful frame in the set (the sign it
-  // replaced only repeated the name beside it). Then the counter in a
-  // row of three, the film from behind it between two bowls held up, the
-  // meze bowl large with the two to go small, the spoon beside the sign,
-  // the name, the five menu cards as one strip, the three posters, and
-  // the drip beside the picnic bag to close. Every file is 1080px or
-  // less, so none of them goes edge to edge.
+  // Set like Holiday Inn: the work is a social feed, so the feed leads.
+  // The name as wide as the page, the film from behind the counter and the
+  // three posters under it as one strip, then the sauce mid-drip (the most
+  // cinematic frame in the set) beside the brief. After it the counter in
+  // a row of three, two bowls, the meze bowl large with the two to go
+  // small, the spoon beside the sign, the name, the five menu cards as one
+  // strip, and the picnic to close. Every file is 1080px or less, so none
+  // of them goes edge to edge.
   "villa-meze": {
-    hero: { kind: "split", src: vm("vm-10-picnic-bowl.webp"), side: "left", tone: "paper", pos: "50% 55%" },
+    hero: { kind: "type" },
     blocks: [
+      {
+        t: "reels",
+        srcs: [vm("vm-reel-3.mp4"), vm("vm-09-poster-sofra.jpg"), vm("vm-14-poster-plan.jpg"), vm("vm-15-poster-bowl.jpg")],
+        gap: "md",
+      },
+      { t: "notes", src: vm("vm-06-drip.jpg"), side: "right", gap: "lg" },
       { t: "trio", srcs: [vm("vm-02-cigkofte.jpg"), vm("vm-03-potatoes.jpg"), vm("vm-05-tray.jpg")], gap: "lg" },
-      { t: "trio", srcs: [vm("vm-13-plant-bowl.jpg"), vm("vm-reel-3.mp4"), vm("vm-12-sarma.webp")], gap: "lg" },
+      { t: "pair", a: vm("vm-13-plant-bowl.jpg"), b: vm("vm-12-sarma.webp"), gap: "md" },
       { t: "offset", big: vm("vm-07-meze-bowl.jpg"), small: vm("vm-04-bowls.jpg"), gap: "lg" },
       { t: "pair", a: vm("vm-11-spoon.jpg"), b: vm("vm-01-sign.jpg"), gap: "md" },
       { t: "word", gap: "lg" },
@@ -300,8 +306,7 @@ const LAYOUTS: Record<string, Layout> = {
         srcs: [vm("vm-16-rus.jpg"), vm("vm-17-girit.jpg"), vm("vm-18-irlanda.jpg"), vm("vm-19-cesit.jpg"), vm("vm-20-atom.jpg")],
         gap: "lg",
       },
-      { t: "trio", srcs: [vm("vm-09-poster-sofra.jpg"), vm("vm-14-poster-plan.jpg"), vm("vm-15-poster-bowl.jpg")], gap: "lg" },
-      { t: "pair", a: vm("vm-06-drip.jpg"), b: vm("vm-08-bag.jpg"), gap: "lg" },
+      { t: "pair", a: vm("vm-10-picnic-bowl.webp"), b: vm("vm-08-bag.jpg"), gap: "lg" },
     ],
   },
 
