@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
 import { Corners } from "@/components/Corners";
 import { Cursor } from "@/components/Cursor";
+import { FilmBurn } from "@/components/FilmBurn";
 import "./globals.css";
 
 // Two faces, both sans. Archivo carries every NAME and NUMBER set large —
@@ -53,6 +54,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Corners />
         <div className="grain-fixed" aria-hidden />
         <Cursor />
+        {/* The cut between pages burns, like the end of a reel. */}
+        <FilmBurn />
       </body>
     </html>
   );

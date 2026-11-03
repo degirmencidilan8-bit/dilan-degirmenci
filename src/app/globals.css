@@ -429,7 +429,24 @@ html:has([data-tone="light"]) body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: room-grain 0.9s steps(4) infinite;
 }
+/* The film burn's fine grain (FilmBurn): finer than the tunnel's — a
+   smaller tile and a higher frequency — stepped the same way. */
+.burn-grain {
+  background-size: 90px 90px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: room-grain 0.9s steps(4) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .burn-grain {
+    animation: none;
+  }
+  /* The Work cards appear without rising out of the dark. */
+  .work-card {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
   [style*="tunnel-drift"],
   [style*="leak-a"],
   [style*="leak-b"],
