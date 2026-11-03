@@ -24,6 +24,13 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 - `npm run dev` çalışırken `npm run build` çalıştırmayın. Gerekirse önce dev
   sunucusunu durdurun.
 - Windows PowerShell'de `npx` betik engeline takılırsa `npx.cmd` kullanın.
+- Batu'nun değişiklikleri `batu-duzenleme` dalına gönderilir, `main`'e değil.
+  Dilan inceleyip uygun görürse `main`'e birleştirir (o zaman canlıya çıkar).
+  Bu dalın Vercel önizlemesi:
+  https://dilan-degirmenci-scripts-git-batu-duzenleme-dilanfarah.vercel.app
+  (Dilan'ın Vercel hesabıyla girişliyken açılır.)
+- Bu dala geçince bir kez `npm install` gerekir: 3B için `three`,
+  `@react-three/fiber` ve `@react-three/drei` paketleri eklendi.
 
 ## İçerik kuralları (en önemlisi)
 
@@ -59,6 +66,13 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 | E-posta, Instagram, About metni | `src/data/profile.ts` |
 | Proje başına başlık harfinin ayarı | `src/data/typography.ts` |
 | Sayfalar | `src/app/…` (Next.js App Router) |
+| Ana sayfa: açılıştan sonra ilk 10 markanın bölüm bölüm geldiği tünel (kaç marka: `BRANDS`) | `src/components/BrandTunnel.tsx`, `src/app/page.tsx` |
+| Tünelin ve Work açılışının arkasındaki ışık perdesi (shader) | `src/components/LightCurtain.tsx` |
+| Work sayfası: kartlar, filtre, GRID / SPHERE seçici (küre: `WorkSphere.tsx`) | `src/components/WorkIndex.tsx` |
+| Work sayfasının açılışındaki çelik diyafram | `src/components/IrisOpening.tsx` |
+| Sayfa geçişlerindeki film yanığı ve D&B mührü (shader) | `src/components/FilmBurn.tsx` |
+| 3B fotoğraf malzemesi (BrandTunnel buradan alıyor) ve deneme sayfası `/lab/gallery` | `src/components/ui/3d-gallery-photography.tsx`, `src/app/lab/` |
+| Eski denemeler, sitede kullanılmıyor | `WorkTunnel.tsx`, `Field.tsx`, `WorkGrid.tsx` |
 
 `AGENTS.md` dosyasındaki Next.js bloğunu `next dev` kendisi yazıyor, elle
 değiştirmeyin. Bu Next.js sürümü (16) eğitim verisindekinden farklı, kod
