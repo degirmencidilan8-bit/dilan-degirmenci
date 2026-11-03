@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { FitText } from "@/components/FitText";
 import { LightCurtain } from "@/components/LightCurtain";
 import { colourOf, createClothMaterial, ramp } from "@/components/ui/3d-gallery-photography";
 import imageLoader from "@/lib/image-loader";
@@ -70,7 +69,7 @@ const LEAD = 0.6;
 const OVERLAP = 22;
 /** The drum: degrees between two brands, and its radius in px. */
 const DRUM_STEP = 24;
-const DRUM_R = 96;
+const DRUM_R = 134;
 
 /** Where a brand sits on the drum, d chapters from the front. */
 function drum(d: number) {
@@ -78,7 +77,7 @@ function drum(d: number) {
   const c = Math.cos((th * Math.PI) / 180);
   const y = DRUM_R * Math.sin((th * Math.PI) / 180);
   return {
-    transform: `translateY(calc(-50% + ${y.toFixed(1)}px)) perspective(520px) rotateX(${(-th).toFixed(1)}deg) scale(${(0.8 + 0.45 * c ** 4).toFixed(3)})`,
+    transform: `translateY(calc(-50% + ${y.toFixed(1)}px)) perspective(720px) rotateX(${(-th).toFixed(1)}deg) scale(${(0.8 + 0.45 * c ** 4).toFixed(3)})`,
     opacity: Math.abs(th) < 82 ? Math.max(0, c) ** 5 : 0,
     reachable: Math.abs(th) < 60,
   };
@@ -185,6 +184,11 @@ function Scene({
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
   const at = useRef(progress.current ?? 0);
   const chapter = useRef(-1);
+  // The focus pull (in place of the flag wave the gallery has; a tilt
+  // towards the pointer was tried too, 2026-11-04): the chapter under the
+  // pointer, and how far each chapter is pulled into focus, 0..1.
+  const aim = useRef(-1);
+  const focus = useRef<number[]>([]);
 
   useFrame((state) => {
     const target = progress.current ?? 0;
@@ -235,8 +239,15 @@ function Scene({
           map.value = textures[slot.hero];
         }
       }
+      // Looked at, and at rest: it comes forward a little and sharpens,
+      // and what is around it falls back and dims.
+      const want = aim.current === c && Math.abs(t) < 0.3 ? 1 : 0;
+      const f = (focus.current[c] ?? 0) + (want - (focus.current[c] ?? 0)) * 0.07;
+      focus.current[c] = f;
+      const lift = f * f * (3 - 2 * f);
+
       // As large as the screen allows: most of its height, most of its width.
-      const h = Math.min(0.64 * viewH, (0.82 * viewW) / ar);
+      const h = Math.min(0.64 * viewH, (0.82 * viewW) / ar) * (1 + 0.05 * lift);
 
       const place = (i: number, x: number, y: number, z: number, height: number, a: number, dof: number) => {
         const mesh = meshes.current[i];
@@ -256,10 +267,11 @@ function Scene({
       };
 
       place(slot.hero, 0, 0, heroZ, h, ar, 0);
+      materials[slot.hero].uniforms.focus.value = lift;
       slot.sats.forEach((i, j) => {
         const s = SATS[j];
-        place(i, s.x * viewW, s.y * viewH, heroZ + s.dz, h * 0.42, aspectOf(textures[i]), s.dz < 0 ? 1.4 : 0.6);
-        materials[i].uniforms.opacity.value *= 0.85;
+        place(i, s.x * viewW, s.y * viewH, heroZ + s.dz, h * 0.42, aspectOf(textures[i]), (s.dz < 0 ? 1.4 : 0.6) + 3 * lift);
+        materials[i].uniforms.opacity.value *= 0.85 * (1 - 0.6 * lift);
       });
     });
   });
@@ -278,12 +290,13 @@ function Scene({
             material={materials[i]}
             onPointerEnter={() => {
               if (!isHero || materials[i].uniforms.opacity.value < 0.6) return;
-              materials[i].uniforms.isHovered.value = 1;
+              aim.current = owner;
               callbacks.current?.onHover(owner);
             }}
             onPointerLeave={() => {
-              materials[i].uniforms.isHovered.value = 0;
-              if (isHero) callbacks.current?.onHover(null);
+              if (!isHero) return;
+              if (aim.current === owner) aim.current = -1;
+              callbacks.current?.onHover(null);
             }}
             onClick={() => {
               if (isHero && materials[i].uniforms.opacity.value > 0.6) callbacks.current?.onSelect(owner);
@@ -415,6 +428,13 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
     >
       <div className="sticky top-0 h-svh overflow-hidden" style={{ background: INK }} data-cursor={hover ? "" : undefined}>
         <LightCurtain tint={colours[chapter]} className="pointer-events-none absolute inset-0" />
+        {/* The focus pull dims the room too: the light behind falls back
+            while a picture is looked at. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: INK, opacity: hover ? 0.45 : 0, transition: "opacity 0.9s ease" }}
+        />
 
         {near ? (
           <Canvas
@@ -452,35 +472,19 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
           style={{ height: "22%", background: `linear-gradient(to bottom, ${INK} 0%, ${INK} 20%, transparent 100%)` }}
         />
 
-        {/* The brand's name across its picture, one chapter at a time. */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 mix-blend-exclusion" style={{ color: BONE }}>
-          {chapters.map((c, k) => (
-            <div
-              key={c.href}
-              // Clear of the index on the left, and as much again on the right.
-              className="absolute inset-x-0 top-1/2 px-3 md:px-[13.5rem]"
-              style={{
-                opacity: k === chapter ? 1 : 0,
-                transform: `translateY(calc(-50% + ${k === chapter ? 0 : k < chapter ? -6 : 6}vh))`,
-                transition: "opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1)",
-              }}
-            >
-              <FitText
-                text={c.title}
-                maxVh={26}
-                className="display leading-[0.85]"
-                style={{ ["--dw" as string]: "62", ["--dg" as string]: "900", ["--dt" as string]: "-0.02em" }}
-              />
-            </div>
-          ))}
-        </div>
+        {/* No name across the picture (Dilan and Batu, 2026-11-04: with it
+            the tunnel read as crowded). The picture speaks; the index on
+            the left says whose it is, and on a phone, where there is no
+            index, the line at the bottom does. */}
 
         {/* The index: every brand on a drum, the current one at the front.
             Placed for the first chapter here; the drum turns from then on. */}
         <nav
           aria-label="Brands"
-          className="absolute left-5 top-1/2 hidden h-[17rem] w-[13rem] -translate-y-1/2 md:block"
+          className="absolute left-5 top-1/2 hidden -translate-y-1/2 md:block"
           style={{
+            height: "24rem",
+            width: "19rem",
             color: BONE,
             maskImage: "linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)",
@@ -498,7 +502,7 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
                 aria-current={k === chapter ? "true" : undefined}
                 onClick={() => window.scrollTo({ top: scrollFor(k), behavior: "smooth" })}
                 className="mono absolute left-0 top-1/2 flex origin-left gap-3 whitespace-nowrap text-left"
-                style={{ fontSize: "0.625rem", transform: p.transform, opacity: p.opacity }}
+                style={{ fontSize: "0.875rem", transform: p.transform, opacity: p.opacity }}
               >
                 <span>{String(k + 1).padStart(2, "0")}</span>
                 <span>{c.title}</span>
@@ -510,6 +514,9 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
 
         {/* The chapter's line, and the way in. */}
         <div className="absolute inset-x-0 bottom-20 flex flex-col items-center gap-2 text-center md:bottom-16" style={{ color: BONE }}>
+          <span className="mono md:hidden" style={{ fontSize: "0.75rem" }}>
+            {current.title}
+          </span>
           <span className="mono opacity-55" style={{ fontSize: "0.6875rem" }}>
             {String(chapter + 1).padStart(2, "0")}/{String(n).padStart(2, "0")} — {current.sub}
           </span>

@@ -85,6 +85,9 @@ export const createClothMaterial = () =>
       scrollForce: { value: 0.0 },
       time: { value: 0.0 },
       isHovered: { value: 0.0 },
+      // 0..1: the frame is being looked at (the homepage tunnel's focus
+      // pull): its edges fringe like light through old glass.
+      focus: { value: 0.0 },
     },
     vertexShader: `
       uniform float scrollForce;
@@ -121,6 +124,7 @@ export const createClothMaterial = () =>
       uniform float opacity;
       uniform float blurAmount;
       uniform float scrollForce;
+      uniform float focus;
       varying vec2 vUv;
 
       void main() {
@@ -138,6 +142,16 @@ export const createClothMaterial = () =>
             }
           }
           color = sum / total;
+        }
+
+        if (focus > 0.001) {
+          // Red and blue drawn a hair apart, only towards the edges, and
+          // the picture lifted a little.
+          vec2 dir = vUv - 0.5;
+          vec2 off = dir * 0.018 * focus * smoothstep(0.12, 0.55, length(dir));
+          color.r = texture2D(map, vUv + off).r;
+          color.b = texture2D(map, vUv - off).b;
+          color.rgb *= 1.0 + 0.07 * focus;
         }
 
         color.rgb += vec3(abs(scrollForce) * 0.005);
