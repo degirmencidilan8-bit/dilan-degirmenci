@@ -7,6 +7,7 @@ import { IrisOpening } from "@/components/IrisOpening";
 import { WorkSphere } from "@/components/WorkSphere";
 import type { FieldFrame, FieldSlot } from "@/data/field";
 import { BONE, INK } from "@/data/palette";
+import { dialStyle, typeDial } from "@/data/typography";
 import type { IndexItem, Kind } from "@/data/work-index";
 
 // The index of work, on the dark ground.
@@ -15,12 +16,13 @@ import type { IndexItem, Kind } from "@/data/work-index";
 // spilling through it until it fills the screen and the work comes up
 // under it.
 //
-// The work itself is a two-column wall of large dark cards, each picture
-// hung in the middle of its card at its own proportions — matted, not
-// cropped, so a portrait from a concert and a still from a film both read
-// whole. Point at a card and the picture opens out to fill it and starts
-// cutting through the rest of its set. On a touch screen the pictures are
-// simply there, whole and in colour.
+// The work itself is a two-column wall of large dark cards. Each cover
+// fills its card held down in the dark, so the covers stop arguing with
+// one another and the wall reads as one thing, and the brand's name runs
+// across it in that project's own type setting, its letters rising in
+// when the card first comes into view. Point at a card and the picture
+// comes up into its own light, the name opens wider, and the card starts
+// cutting through the rest of its set.
 //
 // GRID / SPHERE: the same work on a globe instead (WorkSphere).
 //
@@ -141,8 +143,73 @@ export function WorkIndex({ cards, slots }: { cards: WorkCard[]; slots: FieldSlo
   );
 }
 
-/** One card: the picture matted in the middle; under the pointer it opens
- * out to fill the card and cuts through its set. */
+/** The name across the card, set in its project's own tone (the same
+ * width and weight as on the project page) and sized to the card. Its
+ * letters rise into place one after another the first time the card is
+ * seen; under the pointer the name opens wider. */
+function CardName({ title, slug, seen, on, delay }: { title: string; slug: string; seen: boolean; on: boolean; delay: number }) {
+  const box = useRef<HTMLDivElement>(null);
+  const line = useRef<HTMLSpanElement>(null);
+  const d = typeDial(slug);
+  // Room left so the wider setting under the pointer still fits.
+  const wider = Math.min(125, d.wdth + 16);
+
+  useEffect(() => {
+    const b = box.current;
+    const l = line.current;
+    if (!b || !l) return;
+    const fit = () => {
+      l.style.fontSize = "100px";
+      const w = l.scrollWidth;
+      if (!w || !b.clientWidth) return;
+      const grow = wider / d.wdth;
+      const px = Math.min(((b.clientWidth * 0.86) / (w * grow)) * 100, b.clientHeight * 0.36);
+      l.style.fontSize = `${px.toFixed(1)}px`;
+    };
+    fit();
+    document.fonts?.ready.then(fit).catch(() => {});
+    const ro = new ResizeObserver(fit);
+    ro.observe(b);
+    return () => ro.disconnect();
+  }, [d.wdth, wider]);
+
+  return (
+    // Negative where it crosses the picture, like the names on the
+    // project pages, so it reads over a white wall as well as a dark room.
+    <div ref={box} aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center mix-blend-difference">
+      <span
+        ref={line}
+        className="display flex whitespace-nowrap leading-[0.86]"
+        style={{
+          ...dialStyle(d),
+          ["--dw" as string]: String(on ? wider : d.wdth),
+          color: BONE,
+          fontSize: "8cqw",
+          transition: "font-variation-settings 0.9s cubic-bezier(0.2, 0.7, 0.2, 1)",
+        }}
+      >
+        {[...title].map((ch, k) => (
+          <span key={k} className="inline-block overflow-hidden pb-[0.06em]">
+            <span
+              className="work-letter inline-block"
+              style={{
+                transform: seen ? "none" : "translateY(105%)",
+                transition: `transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) ${(delay + 0.15 + k * 0.035).toFixed(3)}s`,
+              }}
+            >
+              {ch === " " ? " " : ch}
+            </span>
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+/** One card: the picture filling it, held down in the dark so the cards
+ * read as one wall and the name across it carries the card; under the
+ * pointer the picture comes up into its own light and cuts through its
+ * set. */
 function Card({ card, index, eager, delay }: { card: WorkCard; index: number; eager: boolean; delay: number }) {
   const frames = card.frames.length ? card.frames : [{ src: card.img, ratio: 16 / 9, pos: card.pos }];
   const box = useRef<HTMLAnchorElement>(null);
@@ -154,7 +221,7 @@ function Card({ card, index, eager, delay }: { card: WorkCard; index: number; ea
   const [cuts, setCuts] = useState(0);
   const n = frames.length;
   const i = on ? cuts % n : 0;
-  const r = frames[0].ratio;
+  const slug = card.href.split("/").pop() ?? "";
 
   useEffect(() => {
     if (!on || n < 2) return;
@@ -204,14 +271,15 @@ function Card({ card, index, eager, delay }: { card: WorkCard; index: number; ea
         transition: `opacity 1s ease ${delay}s, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) ${delay}s`,
       }}
     >
-      {/* The mat: the picture at its own proportions, centred; filling the
-          card while it is looked at. */}
+      {/* The picture fills the card, dark and a little drained at rest so
+          no one cover shouts over the others; looked at, it comes up and
+          settles back from a slight push-in. */}
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="absolute inset-0"
         style={{
-          aspectRatio: String(r),
-          width: on ? `max(100cqw, calc(100cqh * ${r.toFixed(4)}))` : `min(66cqw, calc(64cqh * ${r.toFixed(4)}))`,
-          transition: "width 0.8s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          filter: on ? "brightness(0.85) saturate(1)" : "brightness(0.58) saturate(0.65)",
+          transform: on ? "scale(1)" : "scale(1.06)",
+          transition: "filter 0.8s ease, transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1)",
         }}
       >
         {(primed ? frames : frames.slice(0, 1)).map((f, k) => (
@@ -228,13 +296,15 @@ function Card({ card, index, eager, delay }: { card: WorkCard; index: number; ea
         ))}
       </div>
 
-      {/* Under the picture's own light, the label needs a floor to stand on
-          once the picture fills the card. */}
+      {/* The edges fall away into the ground, so the name sits in a pool
+          of the picture's light. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 transition-opacity duration-500"
-        style={{ background: `linear-gradient(to top, ${INK}cc, transparent)`, opacity: on ? 1 : 0 }}
+        className="pointer-events-none absolute inset-0"
+        style={{ background: `radial-gradient(120% 90% at 50% 50%, transparent 45%, ${INK}99 100%)` }}
       />
+
+      <CardName title={card.title} slug={slug} seen={seen} on={on} delay={delay} />
 
       <span className="mono absolute right-3 top-3 opacity-50" style={{ color: BONE, fontSize: "0.625rem" }}>
         {String(index + 1).padStart(2, "0")}
@@ -244,10 +314,7 @@ function Card({ card, index, eager, delay }: { card: WorkCard; index: number; ea
         <span className="mono shrink-0 border px-1.5 py-0.5" style={{ fontSize: "0.5625rem", borderColor: BONE }}>
           {card.kind === "film" ? "Film" : "Photo"}
         </span>
-        <span className="mono truncate" style={{ fontSize: "0.6875rem" }}>
-          {card.title}
-        </span>
-        <span className="mono hidden truncate opacity-55 sm:inline" style={{ fontSize: "0.625rem" }}>
+        <span className="mono truncate opacity-70" style={{ fontSize: "0.625rem" }}>
           {card.sub}
         </span>
       </div>
