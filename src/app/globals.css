@@ -225,6 +225,369 @@ a {
   }
 }
 
+/* The homepage's first screen, "two looks, one frame" (TwoLooks). Every
+   value the sequence moves is a custom property on the section. The
+   defaults here are the page at rest, so a second visit, reduced motion,
+   or no JavaScript at all shows the resting page straight away. The start
+   of the sequence is a small stylesheet TwoLooks puts on the page only
+   when it is to play, and while it plays the values are written inline.
+   Frames are in % of the screen. */
+.two-looks {
+  --ax: 4; --ay: 13; --aw: 92; --ah: 72;
+  --bx: 4; --by: 13; --bw: 92; --bh: 72;
+  --s: 0; /* how far apart the names still are, 1 → 0 */
+  --amp: 1; /* the ampersand */
+  --sil: 0; /* the silhouette */
+  --fa: 0.42; /* the frame lines */
+  --ui: 1; /* the way into the work */
+}
+@media (max-width: 767px) {
+  .two-looks {
+    --ax: 5; --ay: 14; --aw: 90; --ah: 70;
+    --bx: 5; --by: 14; --bw: 90; --bh: 70;
+  }
+}
+.two-looks-frame {
+  position: absolute;
+  opacity: var(--fa);
+}
+.two-looks-frame-a {
+  left: calc(var(--ax) * 1%);
+  top: calc(var(--ay) * 1%);
+  width: calc(var(--aw) * 1%);
+  height: calc(var(--ah) * 1%);
+}
+.two-looks-frame-b {
+  left: calc(var(--bx) * 1%);
+  top: calc(var(--by) * 1%);
+  width: calc(var(--bw) * 1%);
+  height: calc(var(--bh) * 1%);
+}
+.two-looks-frame i {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 0 solid #ebe6da;
+}
+.two-looks-frame i:nth-child(1) { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+.two-looks-frame i:nth-child(2) { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+.two-looks-frame i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+.two-looks-frame i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+.two-looks-sil {
+  height: 62%;
+  aspect-ratio: 768 / 1379;
+  transform: translate(-50%, -50%);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  opacity: var(--sil);
+}
+.two-looks-names {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 0.85;
+  font-size: clamp(3rem, 11.5vw, 15rem);
+}
+.two-looks-dilan { transform: translateX(calc(var(--s) * -5vw)); }
+.two-looks-batuhan { transform: translateX(calc(var(--s) * 5vw)); }
+.two-looks-amp { opacity: var(--amp); }
+.two-looks-ui { opacity: var(--ui); transition: border-color 0.2s ease; }
+.two-looks-skip { display: none; opacity: 0.6; }
+.two-looks-skip:hover { opacity: 1; }
+@media (max-width: 767px) {
+  /* On a phone the names are stacked, DILAN to the left, BATUHAN to the
+     right, the ampersand between: nothing runs off the screen. */
+  .two-looks-names {
+    flex-direction: column;
+    align-items: stretch;
+    width: 90vw;
+    font-size: 19vw;
+    line-height: 0.9;
+  }
+  .two-looks-dilan { align-self: flex-start; transform: translateY(calc(var(--s) * -6svh)); }
+  .two-looks-amp { align-self: center; }
+  .two-looks-batuhan { align-self: flex-end; transform: translateY(calc(var(--s) * 6svh)); }
+  .two-looks-sil { height: 50%; }
+}
+
+/* The homepage's first screen as two cards (CardOpening). As with
+   .two-looks, every value the sequence moves is a custom property on the
+   section, and the defaults here are the page at rest: the cards gone,
+   the names up. The start is a small stylesheet CardOpening puts on the
+   page when the sequence is to play. Sharp corners, like everything else. */
+.cards-intro {
+  --co: 0; /* the cards */
+  --rise: 0; /* still coming up, 1 → 0 */
+  --ra: 540; --rb: 540; /* each card's turn, degrees */
+  --cx: 0; /* how far apart the cards still are, 1 → 0 */
+  --flash: 0;
+  --names: 1;
+  --s: 0; /* how far apart the names still are, 1 → 0 */
+  --amp: 1;
+  --ampblur: 0;
+  --ui: 1;
+}
+.cards-intro-table {
+  --ch: min(62svh, 34rem); /* a card's height */
+  --cw: calc(var(--ch) * 2 / 3); /* the studio's card designs are 2:3 */
+  perspective: 1400px;
+}
+.cards-intro-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--cw);
+  height: var(--ch);
+  transform-style: preserve-3d;
+  /* Each card sits beside the middle (--off, edge to the middle line) and
+     a gap further out (--gap); coming together closes the gap but never
+     past it, so the two never cross over each other. */
+  transform: translate(-50%, -50%) translateY(calc(var(--rise) * 40px))
+    translateX(calc(var(--off) + var(--cx) * var(--gap))) rotateY(calc(var(--r) * 1deg));
+}
+.cards-intro-card-a { --r: var(--ra); --off: calc(var(--cw) / -2 - 0.25rem); --gap: -2.5rem; }
+.cards-intro-card-b { --r: var(--rb); --off: calc(var(--cw) / 2 + 0.25rem); --gap: 2.5rem; }
+.cards-intro-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: #121211;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  /* On the faces, not the card: opacity on the card would flatten its 3D
+     and both faces would show. */
+  opacity: var(--co);
+}
+.cards-intro-face::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(235, 230, 218, 0.42);
+  pointer-events: none;
+}
+.cards-intro-front { transform: rotateY(180deg); }
+/* The foil: a rainbow sliding across as the card turns, and a fine
+   diagonal grain, both laid over the whole face. */
+.cards-intro-holo {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(
+      115deg,
+      transparent 18%,
+      hsl(330 90% 72% / 0.55) 30%,
+      hsl(48 95% 66% / 0.55) 40%,
+      hsl(160 80% 62% / 0.55) 50%,
+      hsl(205 95% 68% / 0.55) 60%,
+      hsl(275 85% 72% / 0.55) 70%,
+      transparent 82%
+    );
+  background-size: auto, 300% 300%;
+  background-position: 0 0, calc(var(--r) * 0.32%) 50%;
+  mix-blend-mode: screen;
+  opacity: 0.13;
+}
+/* Face down: a large iris, turning a little with the card. */
+.cards-intro-iris {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62%;
+  transform: translate(-50%, -50%) rotate(calc(var(--r) * 0.25deg));
+}
+/* Face up: the card the studio designed, filling the face, the foil and a
+   band of light over it. The design draws its own border, so the face's
+   hairline is left off. */
+.cards-intro-front {
+  background: #e7e1d4;
+}
+.cards-intro-front::after {
+  display: none;
+}
+.cards-intro-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cards-intro-front .cards-intro-holo {
+  mix-blend-mode: overlay;
+  opacity: 0.34;
+}
+.cards-intro-glare {
+  --sh: calc(var(--r) / 540 * 160% - 30%);
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    105deg,
+    transparent calc(var(--sh) - 16%),
+    rgba(255, 255, 255, 0.85) var(--sh),
+    transparent calc(var(--sh) + 16%)
+  );
+}
+.cards-intro-flash {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* The light in the gap between the cards: tall and narrow, where the
+     two would have met. */
+  width: calc(var(--cw) * 1.3);
+  height: calc(var(--ch) * 1.35);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 252, 244, 0.75), rgba(235, 230, 218, 0.18) 45%, transparent);
+  mix-blend-mode: screen;
+  opacity: var(--flash);
+}
+.cards-intro-names {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 0.85;
+  font-size: clamp(3rem, 11.5vw, 15rem);
+  opacity: var(--names);
+}
+/* Each name comes in from where its card was, and settles. */
+.cards-intro-dilan { transform: translateX(calc(var(--s) * -7vw)); filter: blur(calc(var(--s) * 10px)); }
+.cards-intro-batuhan { transform: translateX(calc(var(--s) * 7vw)); filter: blur(calc(var(--s) * 10px)); }
+/* The ampersand is the last thing to come into focus (--ampblur 1 → 0). */
+.cards-intro-amp { opacity: var(--amp); filter: blur(calc(var(--ampblur) * 14px)); }
+.cards-intro-ui { opacity: var(--ui); }
+/* "Explore more" and its arrow, under the names: the arrow sinks a little
+   and comes back, slowly, pointing the way down. */
+.cards-intro-more {
+  color: #ebe6da;
+  transition: color 0.2s ease;
+}
+.cards-intro-more:hover {
+  color: #fff;
+}
+@keyframes cards-intro-sink {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50% { transform: translateY(7px); opacity: 1; }
+}
+.cards-intro-arrow {
+  animation: cards-intro-sink 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cards-intro-arrow { animation: none; }
+}
+.cards-intro-skip { display: none; opacity: 0.6; }
+.cards-intro-skip:hover { opacity: 1; }
+@media (max-width: 767px) {
+  .cards-intro-table { --ch: min(64vw, 52svh); }
+  .cards-intro-card-a { --off: calc(var(--cw) / -2 - 0.125rem); --gap: -0.9rem; }
+  .cards-intro-card-b { --off: calc(var(--cw) / 2 + 0.125rem); --gap: 0.9rem; }
+  .cards-intro-names {
+    flex-direction: column;
+    align-items: stretch;
+    width: 90vw;
+    font-size: 19vw;
+    line-height: 0.9;
+  }
+  .cards-intro-dilan { align-self: flex-start; transform: translateX(calc(var(--s) * -10vw)); }
+  .cards-intro-amp { align-self: center; }
+  .cards-intro-batuhan { align-self: flex-end; transform: translateX(calc(var(--s) * 10vw)); }
+}
+
+/* The homepage folio (FolioFlow): the prints, dark, a quarter of the
+   screen wide, a hairline edge and their number and name small along the
+   bottom; placed and scaled by FolioFlow as the page scrolls. */
+.folio-sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(200px, 24vw, 380px);
+  padding: 7px 7px 30px;
+  background: #151514;
+  box-shadow: 0 0 0 1px rgba(235, 230, 218, 0.1), 0 40px 90px rgba(0, 0, 0, 0.6);
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  color: #ebe6da;
+}
+.folio-picture {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #0f0f0e;
+}
+.folio-caption {
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  bottom: 9px;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folio-title {
+  right: 6vw;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 32vw;
+  text-align: right;
+}
+.folio-name {
+  font-size: clamp(2.75rem, 6.4vw, 7.5rem);
+  animation: folio-name-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+/* The name changes in one short rise as one print gives way to the next. */
+@keyframes folio-name-in {
+  from { opacity: 0; transform: translateY(0.25em); }
+  to { opacity: 1; transform: none; }
+}
+.folio-progress {
+  left: 6vw;
+  right: 6vw;
+  bottom: 4.5rem;
+  display: flex;
+  gap: 2.2rem;
+  border-top: 1px solid rgba(235, 230, 218, 0.2);
+  padding-top: 0.75rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+}
+.folio-progress span { opacity: 0.4; transition: opacity 0.3s ease; }
+.folio-progress span.is-on { opacity: 1; }
+@media (max-width: 767px) {
+  .folio-sheet { width: 58vw; padding: 5px 5px 24px; }
+  .folio-caption { left: 6px; right: 6px; bottom: 7px; font-size: 0.5625rem; }
+  .folio-title { left: 5vw; right: 5vw; top: 4.5rem; transform: none; max-width: none; text-align: right; }
+  .folio-name { font-size: 11vw; }
+  .folio-progress { left: 5vw; right: 5vw; bottom: 3.5rem; gap: 0; justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folio-name { animation: none; }
+}
+
+/* The homepage's projects after the opening (EditorialFlow): each block
+   settles into place as it comes up — a little rise and the light coming
+   up, once. Hidden only once the script has armed the section, so without
+   it (or under reduced motion) everything is simply there. */
+.flow[data-armed] .flow-reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.flow[data-armed] .flow-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
 /* The homepage's scroll stops: the opening, then each brand of the tunnel
    at rest. On a touch screen only, where one hard flick would otherwise
    carry the tunnel two or three brands on; with a mouse or trackpad the
@@ -244,6 +607,11 @@ a {
     scroll-snap-type: y mandatory;
   }
 }
+/* The browser's scroll anchoring nudged the homepage a few pixels as the
+   tunnel was put up, and the page is placed exactly, brand by brand. */
+html:has(.tunnel-stop) {
+  overflow-anchor: none;
+}
 
 /* The four corner words. Technical face, small, tracked; the underline is
    transparent until the word is the page you are on, when it turns red. */
@@ -258,6 +626,46 @@ a {
 }
 .corner-word:hover {
   opacity: 0.6;
+}
+
+/* In the homepage tunnel (BrandTunnel marks <html> in-tunnel while it
+   holds the screen) the four corner words come forward: larger, growing
+   out of their own corner, and breathing — swelling a little and
+   brightening, slowly, out of step with each other — so the way on from
+   the tunnel is never missed. Sized by transform, so nothing moves the
+   layout. */
+@property --corner-breath {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@keyframes corner-breathe {
+  0%, 100% { --corner-breath: 1; opacity: 0.72; }
+  50% { --corner-breath: 1.07; opacity: 1; }
+}
+.corner-word {
+  --corner-size: 1;
+  transform: scale(calc(var(--corner-size) * var(--corner-breath)));
+  transition: opacity 0.2s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), text-shadow 0.8s ease;
+}
+.corner-word[data-corner="tl"] { transform-origin: left top; }
+.corner-word[data-corner="tr"] { transform-origin: right top; }
+.corner-word[data-corner="bl"] { transform-origin: left bottom; }
+.corner-word[data-corner="br"] { transform-origin: right bottom; }
+html.in-tunnel .corner-word {
+  --corner-size: 1.6;
+  text-shadow: 0 0 18px rgba(235, 230, 218, 0.35);
+  animation: corner-breathe 3.6s ease-in-out infinite;
+}
+html.in-tunnel .corner-word[data-corner="tr"] { animation-delay: -0.9s; }
+html.in-tunnel .corner-word[data-corner="bl"] { animation-delay: -1.8s; }
+html.in-tunnel .corner-word[data-corner="br"] { animation-delay: -2.7s; }
+html.in-tunnel .corner-word:hover { animation-play-state: paused; opacity: 1; }
+@media (max-width: 767px) {
+  html.in-tunnel .corner-word { --corner-size: 1.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.in-tunnel .corner-word { animation: none; }
 }
 
 /* The light page (the Work index) takes the whole canvas with it, so an
@@ -406,9 +814,9 @@ html:has([data-tone="light"]) body {
 .viewfinder-frame i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1.5px; border-bottom-width: 1.5px; }
 .viewfinder-frame i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1.5px; border-bottom-width: 1.5px; }
 .viewfinder-iris {
-  width: 32px;
-  height: 32px;
-  margin: -16px 0 0 -16px;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
 }
 .viewfinder-iris svg {
   display: block;

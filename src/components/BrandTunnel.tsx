@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { LightCurtain } from "@/components/LightCurtain";
 import { colourOf, createClothMaterial, ramp } from "@/components/ui/3d-gallery-photography";
 import imageLoader from "@/lib/image-loader";
+import { INTRO_DONE, introPlaying, markTunnelUp } from "@/lib/intro";
 import { BONE, INK } from "@/data/palette";
 
 // The work, one brand at a time. The page scrolls through a tunnel in
@@ -83,11 +84,25 @@ function drum(d: number) {
   };
 }
 
+/** A device that says it is small: few cores, little memory, or saving
+ * data. It gets the light tunnel. */
+function smallDevice() {
+  if (typeof navigator === "undefined") return false;
+  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+  return (
+    Boolean(nav.connection?.saveData) ||
+    (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+    (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
+  );
+}
+
 type Callbacks = {
   onChapter: (k: number) => void;
   onColours: (c: string[]) => void;
   onHover: (k: number | null) => void;
   onSelect: (k: number) => void;
+  /** Every picture is loaded and the scene is up. */
+  onReady: () => void;
 };
 
 // The hold: |t| under this much is the chapter at rest.
@@ -112,10 +127,13 @@ function Scene({
   chapters,
   progress,
   callbacks,
+  filmsOff,
 }: {
   chapters: { hero: string; video?: string; sats: string[] }[];
   progress: RefObject<number>;
   callbacks: RefObject<Callbacks>;
+  /** Films are left as their pictures (a slow device; see BrandTunnel). */
+  filmsOff: RefObject<boolean>;
 }) {
   // Every picture in one flat list: chapter k's hero, then its satellites.
   const layout = useMemo(() => {
@@ -144,8 +162,30 @@ function Scene({
     });
   }, [materials, textures]);
 
+  // Up to the graphics card a little at a time. Sending three dozen large
+  // pictures at once — each decoded on the spot, then copied over — held
+  // the page, and the light curtain under the names stopped dead for a
+  // moment just before the page went down into the tunnel. Now every
+  // picture is decoded first, off the main thread (img.decode), and then
+  // one goes up each frame, the scene kept hidden until all have; only
+  // then is it ready.
+  const { gl } = useThree();
+  const uploaded = useRef(-1); // -1 while decoding, then how many are up
   useEffect(() => {
-    callbacks.current?.onColours(layout.slots.map((s) => colourOf(textures[s.hero])));
+    uploaded.current = -1;
+    let cancelled = false;
+    const decoding = textures.map((t) => {
+      const img = t.image as HTMLImageElement | undefined;
+      return img && typeof img.decode === "function" ? img.decode().catch(() => {}) : Promise.resolve();
+    });
+    Promise.all(decoding).then(() => {
+      if (cancelled) return;
+      callbacks.current?.onColours(layout.slots.map((s) => colourOf(textures[s.hero])));
+      uploaded.current = 0;
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [layout, textures, callbacks]);
 
   // The films, one per chapter that has one; nothing is fetched yet.
@@ -191,6 +231,35 @@ function Scene({
   const focus = useRef<number[]>([]);
 
   useFrame((state) => {
+    const all = textures.length;
+    if (uploaded.current <= all) {
+      const hide = () =>
+        meshes.current.forEach((m) => {
+          if (m) m.visible = false;
+        });
+      hide();
+      if (uploaded.current >= 0 && uploaded.current < all) {
+        gl.initTexture(textures[uploaded.current]);
+        uploaded.current += 1;
+      } else if (uploaded.current === all) {
+        // Every picture is up: now the shader, compiled in the background
+        // where the browser can (compileAsync) rather than all at once the
+        // first time a picture is drawn. It looks only at what is visible,
+        // so the frames are shown to it for the call and hidden again.
+        uploaded.current = all + 0.5;
+        meshes.current.forEach((m) => {
+          if (m) m.visible = true;
+        });
+        const done = () => {
+          uploaded.current = all + 1;
+          callbacks.current?.onReady();
+        };
+        gl.compileAsync(state.scene, state.camera).then(done, done);
+        hide();
+      }
+      return;
+    }
+    if (uploaded.current < all + 1) return;
     const target = progress.current ?? 0;
     const prev = at.current;
     at.current += (target - at.current) * 0.075;
@@ -216,7 +285,7 @@ function Scene({
       // screen, in place of the picture once it has a frame to show.
       const film = films.current[c];
       let ar = aspectOf(textures[slot.hero]);
-      if (film) {
+      if (film && !filmsOff.current) {
         if (Math.abs(t) < 2 && !film.el.src) {
           film.el.src = film.el.dataset.src ?? "";
           film.el.load();
@@ -238,6 +307,11 @@ function Scene({
         } else {
           map.value = textures[slot.hero];
         }
+      } else if (film?.playing) {
+        // Films turned off while one played: back to its picture.
+        film.playing = false;
+        film.el.pause();
+        materials[slot.hero].uniforms.map.value = textures[slot.hero];
       }
       // Looked at, and at rest: it comes forward a little and sharpens,
       // and what is around it falls back and dims.
@@ -315,7 +389,20 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
   const router = useRouter();
   const section = useRef<HTMLElement>(null);
   const progress = useRef(-LEAD);
-  const callbacks = useRef<Callbacks>({ onChapter: () => {}, onColours: () => {}, onHover: () => {}, onSelect: () => {} });
+  const callbacks = useRef<Callbacks>({
+    onChapter: () => {},
+    onColours: () => {},
+    onHover: () => {},
+    onSelect: () => {},
+    onReady: () => {},
+  });
+  // The light version, for a device that struggles (see measuring below):
+  // the scene drawn at the screen's own resolution, not twice it, without
+  // antialiasing, and with pictures in place of the films.
+  // (Only the scene reads it, and the scene is never in the server's page.)
+  const [lite] = useState(smallDevice);
+  const [slow, setSlow] = useState(false);
+  const filmsOff = useRef(false);
   const [chapter, setChapter] = useState(0);
   const [colours, setColours] = useState<string[]>([]);
   const [hover, setHover] = useState(false);
@@ -336,10 +423,10 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
     const sat = Math.min(1024, Math.max(320, Math.round(hero * 0.45)));
     return chapters.map((c) => ({
       hero: imageLoader({ src: c.hero, width: hero }),
-      video: c.video,
+      video: lite ? undefined : c.video,
       sats: c.sats.map((s) => imageLoader({ src: s, width: sat })),
     }));
-  }, [chapters]);
+  }, [chapters, lite]);
 
   // Where the page has to be for chapter k to be at rest.
   const scrollFor = useCallback(
@@ -374,14 +461,59 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
       onColours: setColours,
       onHover: (k) => setHover(k !== null),
       onSelect: (k) => router.push(chapters[k].href),
+      onReady: () => {},
     };
   }, [chapters, router]);
+
+  // Is this device up to the full tunnel? Asked once, before the scene is
+  // put up: a device that says it is small (few cores, little memory, data
+  // saving on) gets the light version, and so does one that could not keep
+  // the opening sequence smooth — its frames are timed while it plays.
+  useEffect(() => {
+    // Small, said by the device itself (smallDevice): known before the
+    // scene is put up, so it is put up light. Slow, found by timing the
+    // opening: the scene is up by then, so it is lightened where it stands
+    // — drawn at the screen's own resolution, the films left as pictures.
+    const decide = (slow: boolean) => {
+      if (!slow) return;
+      filmsOff.current = true;
+      setSlow(true);
+    };
+    if (!introPlaying()) return;
+    let raf = 0;
+    let last = 0;
+    let frames = 0;
+    let total = 0;
+    const tick = (now: number) => {
+      if (last) {
+        frames += 1;
+        total += now - last;
+      }
+      last = now;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    const onDone = () => {
+      cancelAnimationFrame(raf);
+      // Under about 45 frames a second, on average, through the sequence.
+      decide(frames > 20 && total / frames > 22);
+    };
+    window.addEventListener(INTRO_DONE, onDone, { once: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener(INTRO_DONE, onDone);
+    };
+  }, []);
 
   useEffect(() => {
     const el = section.current;
     if (!el) return;
+    const root = document.documentElement;
     const onScroll = () => {
       const box = el.getBoundingClientRect();
+      // While the tunnel holds the screen the corner words come forward
+      // (.corner-word in globals.css).
+      root.classList.toggle("in-tunnel", box.top <= 1 && box.bottom >= window.innerHeight * 0.5);
       // While the tunnel is still coming up under the opening, its top
       // is held in the dark and the light rises out of it.
       if (dawn.current) {
@@ -399,7 +531,23 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-    const ahead = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: "100% 0px" });
+    // The 3D scene is put up as soon as the tunnel is near — on the
+    // homepage, at once. Putting it up (a WebGL context, three dozen
+    // materials) is a third of a second the browser cannot break up, and
+    // wherever it fell on screen something stopped: in the middle of the
+    // cards turning over, or the light curtain under the names. So it is
+    // done first, while the screen is still dark, and the opening waits for
+    // it (TUNNEL_UP, see CardOpening); its pictures then go up a frame at a
+    // time while the cards play (see Scene).
+    let wanted = false;
+    const ahead = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting || wanted) return;
+        wanted = true;
+        setNear(true);
+      },
+      { rootMargin: "100% 0px" },
+    );
     const seen = new IntersectionObserver(([e]) => setLive(e.isIntersecting));
     ahead.observe(el);
     seen.observe(el);
@@ -408,8 +556,10 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
       window.removeEventListener("resize", onScroll);
       ahead.disconnect();
       seen.disconnect();
+      root.classList.remove("in-tunnel");
     };
   }, [n]);
+
 
   // The drum turns with the scroll, eased, written straight to the page.
   useEffect(() => {
@@ -443,7 +593,7 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
       style={{ height: `${(n - 1 + LEAD) * PER_CHAPTER * 100 + 100}svh`, marginTop: `-${OVERLAP}svh` }}
     >
       {stops.map((top, k) => (
-        <div key={k} aria-hidden className="tunnel-stop" style={{ top }} />
+        <div key={k} aria-hidden className="tunnel-stop" style={{ top }} data-explore-target={k === 0 ? "" : undefined} />
       ))}
       <div className="sticky top-0 h-svh overflow-hidden" style={{ background: INK }} data-cursor={hover ? "" : undefined}>
         <LightCurtain tint={colours[chapter]} className="pointer-events-none absolute inset-0" />
@@ -458,11 +608,13 @@ export function BrandTunnel({ chapters }: { chapters: Chapter[] }) {
         {near ? (
           <Canvas
             camera={{ position: [0, 0, 0], fov: FOV }}
-            gl={{ antialias: true, alpha: true }}
+            gl={{ antialias: !lite, alpha: true }}
+            dpr={lite || slow ? 1 : [1, 1.75]}
+            onCreated={markTunnelUp}
             frameloop={live ? "always" : "never"}
             style={{ position: "absolute", inset: 0, touchAction: "pan-y" }}
           >
-            <Scene chapters={sized} progress={progress} callbacks={callbacks} />
+            <Scene chapters={sized} progress={progress} callbacks={callbacks} filmsOff={filmsOff} />
           </Canvas>
         ) : null}
 

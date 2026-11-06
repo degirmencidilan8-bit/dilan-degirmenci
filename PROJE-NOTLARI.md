@@ -71,14 +71,21 @@ otomatik okur. Yeni bir karar alındığında buraya eklenmeli.
 | Proje metinleri: tek cümle, brief, katkı, çıktı, konum | `src/data/colophons.ts` |
 | Proje sayfasının kurgusu: hangi fotoğraf tam ekran, ikili, üçlü vb. | `src/data/layouts.ts` (çizen: `src/components/Directed.tsx`) |
 | Work sayfasındaki sıra ve kapak kadrajı | `src/data/work-index.ts` |
-| Ana sayfa açılışında dönen 12 kare | `src/data/opener.ts` |
+| Ana sayfa açılışı (şu an): dönen iki holografik kart, sonra isimler ve Explore work (oturumda bir kez oynar) | `src/components/CardOpening.tsx`, değerleri `globals.css` içinde `.cards-intro` |
+| Denenen açılış "İki bakış, tek kare": buluşan iki kadraj | `src/components/TwoLooks.tsx`, `globals.css` içinde `.two-looks` |
+| Açılışlar arasında geçiş: `page.tsx` içinde `OPENING` = `"cards"`, `"two-looks"` ya da eski hâli `"reel"` | `src/app/page.tsx` |
+| Eski açılışta dönen 12 kare | `src/data/opener.ts` (çizen: `Opener.tsx`) |
 | Ana sayfadaki dağınık küçük kareler | `src/data/field.ts` |
 | Filmler (kamera arkası, kampanya filmleri) | `src/data/films.ts` |
 | E-posta, Instagram, About metni | `src/data/profile.ts` |
 | Proje başına başlık harfinin ayarı | `src/data/typography.ts` |
 | Sayfalar | `src/app/…` (Next.js App Router) |
-| Ana sayfa tüneli: hangi markalar, hangi sırayla, hangisi hangi videoyla gelir (`TUNNEL` listesi) | `src/app/page.tsx` |
-| Tünelin kendisi: 3B geçiş, videolar, soldaki dönen marka listesi | `src/components/BrandTunnel.tsx` |
+| Ana sayfada açılıştan sonra gelen editoryal akış (denendi 2026-11-06, şu an kapalı): hangi projeler, hangi sırayla, hangi görsellerle, hangi düzende | `src/data/home-flow.ts` (çizen: `src/components/EditorialFlow.tsx`) |
+| Açılıştan sonra ne gelir: `page.tsx` içinde `AFTER` = `"folio"` (şu an), `"tunnel"` ya da `"editorial"` | `src/app/page.tsx` |
+| Folio (şu an açık): aynı markalar koyu baskılar hâlinde sığ derinlikte; öndeki sol alta çıkar, sıradaki sağ üstten gelir. Markalar ve videolar `TUNNEL` listesinden | `src/components/FolioFlow.tsx`, görünüşü `globals.css` içinde `.folio-` |
+| Ana sayfa tüneli ve folyonun ortak marka listesi: hangi markalar, hangi sırayla, hangisi hangi videoyla gelir (`TUNNEL` listesi) | `src/app/page.tsx` |
+| Tünelin kendisi: 3B geçiş, videolar, soldaki dönen marka listesi; yavaş cihazlarda hafif mod. (Kendi kendine kayan sürüm denendi, 2026-11-06, kaldırıldı: yerine başlığın altında "Explore more" ve aşağı ok var, `CardOpening.tsx`) | `src/components/BrandTunnel.tsx` |
+| Köşe menüsünün tünelde büyüyüp nefes alması | `globals.css` içinde `html.in-tunnel .corner-word` |
 | Tünelin ve Work açılışının arkasındaki ışık perdesi (shader) | `src/components/LightCurtain.tsx` |
 | Work sayfası: karartılmış kapaklar ve üstlerindeki marka adları, filtre, GRID / SPHERE seçici (küre: `WorkSphere.tsx`) | `src/components/WorkIndex.tsx` |
 | Fare imleci: dönen diyafram ve tıklanabilir şeyleri çerçeveleyen köşeler | `src/components/Cursor.tsx` |
