@@ -185,7 +185,11 @@ export function FilmBurn() {
   const grain = useRef<HTMLDivElement>(null);
   const mono = useRef<HTMLDivElement>(null);
   const kick = useRef<() => void>(() => {});
-  const first = useRef(true);
+  // The page last burnt onto. Its first value is the page the site opened
+  // on, which does not burn; nor does the same page coming round again
+  // (React runs effects twice in development, and a flag for "the first
+  // time" was spent on the first run, so the site burnt as it opened).
+  const shown = useRef<string | null>(null);
 
   // The draw loop, set up once.
   useEffect(() => {
@@ -361,10 +365,11 @@ export function FilmBurn() {
 
   // The new page is here: burn back off it.
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
+    if (shown.current === null || shown.current === pathname) {
+      shown.current = pathname;
       return;
     }
+    shown.current = pathname;
     const b = burn.current;
     const now = performance.now();
     if (b.phase === "in" || b.phase === "hold") {
