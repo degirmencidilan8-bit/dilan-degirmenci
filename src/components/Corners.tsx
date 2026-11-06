@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { markHydrated } from "@/lib/intro";
 import { FEATURE_SLUGS } from "@/data/features";
 import { profile } from "@/data/profile";
 import { BONE, INK, RED } from "@/data/palette";
@@ -22,10 +24,10 @@ import { BONE, INK, RED } from "@/data/palette";
 // Its place goes to the studio's Instagram, the one link out.
 
 const LINKS = [
-  { href: "/work", label: "Work", corner: "left-5 top-4 md:left-8 md:top-6" },
-  { href: "/about", label: "About", corner: "right-5 top-4 md:right-8 md:top-6" },
-  { href: profile.instagram.url, label: "Instagram", corner: "bottom-4 left-5 md:bottom-6 md:left-8", external: true },
-  { href: "/contact", label: "Contact", corner: "bottom-4 right-5 md:bottom-6 md:right-8" },
+  { href: "/work", label: "Work", corner: "left-5 top-4 md:left-8 md:top-6", at: "tl" },
+  { href: "/about", label: "About", corner: "right-5 top-4 md:right-8 md:top-6", at: "tr" },
+  { href: profile.instagram.url, label: "Instagram", corner: "bottom-4 left-5 md:bottom-6 md:left-8", at: "bl", external: true },
+  { href: "/contact", label: "Contact", corner: "bottom-4 right-5 md:bottom-6 md:right-8", at: "br" },
 ];
 
 /** Pages set on the light ground: the projects written up as features —
@@ -46,6 +48,9 @@ export function Corners() {
   const light = isLightPage(pathname);
   const fg = light ? INK : BONE;
   const home = pathname === "/";
+  // On every page, so whichever page the site opens on, the homepage
+  // knows when it is later put together in the browser (see lib/intro).
+  useEffect(() => markHydrated(), []);
 
   // A band of the page's own ground behind the words, top and bottom, so
   // nothing that scrolls underneath is ever read through them — measured on
@@ -76,6 +81,7 @@ export function Corners() {
               href={l.href}
               target="_blank"
               rel="noopener noreferrer"
+              data-corner={l.at}
               className={`corner-word fixed z-50 ${l.corner}`}
               style={{ color: fg }}
             >
@@ -89,6 +95,7 @@ export function Corners() {
             key={l.href}
             href={l.href}
             aria-current={on ? "page" : undefined}
+            data-corner={l.at}
             className={`corner-word fixed z-50 ${l.corner}`}
             style={{
               color: fg,
