@@ -154,15 +154,46 @@ a {
    a blended full-screen layer forces the whole viewport to recomposite
    on every frame of the band's motion, which this project has already
    been bitten by once. Plain opacity is free by comparison. */
+/* Film grain over every page, faint, and alive the way film's is (Batu,
+   2026-11-07): the grain jumps to a new place twelve times a second, as
+   it would frame to frame, instead of lying still on the screen like a
+   texture. It is moved by transform on an oversized layer, so the browser
+   only slides it — nothing is redrawn. Still under reduced motion. */
 .grain-fixed {
   position: fixed;
   inset: 0;
   z-index: 200;
   pointer-events: none;
-  opacity: 0.042;
+  overflow: hidden;
+  opacity: 0.055;
+}
+.grain-fixed::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
   background-repeat: repeat;
   background-size: 140px 140px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: film-grain 1s steps(1) infinite;
+  will-change: transform;
+}
+@keyframes film-grain {
+  0% { transform: translate(0, 0); }
+  8.33% { transform: translate(-37px, 23px); }
+  16.66% { transform: translate(51px, -14px); }
+  25% { transform: translate(-12px, -61px); }
+  33.33% { transform: translate(66px, 41px); }
+  41.66% { transform: translate(-58px, -29px); }
+  50% { transform: translate(19px, 57px); }
+  58.33% { transform: translate(-71px, 8px); }
+  66.66% { transform: translate(34px, -47px); }
+  75% { transform: translate(-25px, 69px); }
+  83.33% { transform: translate(61px, -63px); }
+  91.66% { transform: translate(-44px, 36px); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grain-fixed::before { animation: none; }
 }
 
 /* The one-line note in a project page's top-left corner, beside a band
@@ -223,96 +254,6 @@ a {
   .corner-rail dd {
     font-size: 0.75rem;
   }
-}
-
-/* The homepage's first screen, "two looks, one frame" (TwoLooks). Every
-   value the sequence moves is a custom property on the section. The
-   defaults here are the page at rest, so a second visit, reduced motion,
-   or no JavaScript at all shows the resting page straight away. The start
-   of the sequence is a small stylesheet TwoLooks puts on the page only
-   when it is to play, and while it plays the values are written inline.
-   Frames are in % of the screen. */
-.two-looks {
-  --ax: 4; --ay: 13; --aw: 92; --ah: 72;
-  --bx: 4; --by: 13; --bw: 92; --bh: 72;
-  --s: 0; /* how far apart the names still are, 1 → 0 */
-  --amp: 1; /* the ampersand */
-  --sil: 0; /* the silhouette */
-  --fa: 0.42; /* the frame lines */
-  --ui: 1; /* the way into the work */
-}
-@media (max-width: 767px) {
-  .two-looks {
-    --ax: 5; --ay: 14; --aw: 90; --ah: 70;
-    --bx: 5; --by: 14; --bw: 90; --bh: 70;
-  }
-}
-.two-looks-frame {
-  position: absolute;
-  opacity: var(--fa);
-}
-.two-looks-frame-a {
-  left: calc(var(--ax) * 1%);
-  top: calc(var(--ay) * 1%);
-  width: calc(var(--aw) * 1%);
-  height: calc(var(--ah) * 1%);
-}
-.two-looks-frame-b {
-  left: calc(var(--bx) * 1%);
-  top: calc(var(--by) * 1%);
-  width: calc(var(--bw) * 1%);
-  height: calc(var(--bh) * 1%);
-}
-.two-looks-frame i {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 0 solid #ebe6da;
-}
-.two-looks-frame i:nth-child(1) { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
-.two-looks-frame i:nth-child(2) { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
-.two-looks-frame i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
-.two-looks-frame i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
-.two-looks-sil {
-  height: 62%;
-  aspect-ratio: 768 / 1379;
-  transform: translate(-50%, -50%);
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  opacity: var(--sil);
-}
-.two-looks-names {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  white-space: nowrap;
-  line-height: 0.85;
-  font-size: clamp(3rem, 11.5vw, 15rem);
-}
-.two-looks-dilan { transform: translateX(calc(var(--s) * -5vw)); }
-.two-looks-batuhan { transform: translateX(calc(var(--s) * 5vw)); }
-.two-looks-amp { opacity: var(--amp); }
-.two-looks-ui { opacity: var(--ui); transition: border-color 0.2s ease; }
-.two-looks-skip { display: none; opacity: 0.6; }
-.two-looks-skip:hover { opacity: 1; }
-@media (max-width: 767px) {
-  /* On a phone the names are stacked, DILAN to the left, BATUHAN to the
-     right, the ampersand between: nothing runs off the screen. */
-  .two-looks-names {
-    flex-direction: column;
-    align-items: stretch;
-    width: 90vw;
-    font-size: 19vw;
-    line-height: 0.9;
-  }
-  .two-looks-dilan { align-self: flex-start; transform: translateY(calc(var(--s) * -6svh)); }
-  .two-looks-amp { align-self: center; }
-  .two-looks-batuhan { align-self: flex-end; transform: translateY(calc(var(--s) * 6svh)); }
-  .two-looks-sil { height: 50%; }
 }
 
 /* The homepage's first screen as two cards (CardOpening). As with
@@ -481,6 +422,42 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .cards-intro-arrow { animation: none; }
 }
+/* As the run down to the work begins, Explore Work goes in a flash (Batu,
+   2026-11-07): it turns to its negative and flares, a small burst of
+   light opens behind it in difference — negative over the dark — and it
+   is gone in half a second, before the name can pass over it. */
+.cards-intro-more.is-flash {
+  position: relative;
+  pointer-events: none;
+  animation: explore-flash 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.cards-intro-more.is-flash::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 14rem;
+  height: 14rem;
+  pointer-events: none;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 255, 255, 0.55) 16%, rgba(255, 255, 255, 0.12) 34%, transparent 62%);
+  mix-blend-mode: difference;
+  animation: explore-burst 0.5s ease-out forwards;
+}
+@keyframes explore-flash {
+  0% { opacity: 1; filter: none; transform: none; }
+  16% { opacity: 1; filter: invert(1) brightness(2.4); transform: scale(1.06); text-shadow: 0 0 18px #fff; }
+  45% { opacity: 0.85; filter: brightness(3) blur(1px); }
+  100% { opacity: 0; filter: brightness(2) blur(6px); transform: scale(1.18); }
+}
+@keyframes explore-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.15); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cards-intro-more.is-flash { animation: none; opacity: 0; }
+  .cards-intro-more.is-flash::after { display: none; }
+}
 .cards-intro-skip { display: none; opacity: 0.6; }
 .cards-intro-skip:hover { opacity: 1; }
 @media (max-width: 767px) {
@@ -572,45 +549,6 @@ a {
 }
 @media (prefers-reduced-motion: reduce) {
   .folio-name { animation: none; }
-}
-
-/* The homepage's projects after the opening (EditorialFlow): each block
-   settles into place as it comes up — a little rise and the light coming
-   up, once. Hidden only once the script has armed the section, so without
-   it (or under reduced motion) everything is simply there. */
-.flow[data-armed] .flow-reveal {
-  opacity: 0;
-  transform: translateY(36px);
-  transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.flow[data-armed] .flow-reveal.is-in {
-  opacity: 1;
-  transform: none;
-}
-
-/* The homepage's scroll stops: the opening, then each brand of the tunnel
-   at rest. On a touch screen only, where one hard flick would otherwise
-   carry the tunnel two or three brands on; with a mouse or trackpad the
-   scroll stays free. Each stop is one the scroll cannot pass in a single
-   gesture. */
-.tunnel-stop {
-  position: absolute;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-@media (pointer: coarse) {
-  html:has(.tunnel-stop) {
-    scroll-snap-type: y mandatory;
-  }
-}
-/* The browser's scroll anchoring nudged the homepage a few pixels as the
-   tunnel was put up, and the page is placed exactly, brand by brand. */
-html:has(.tunnel-stop) {
-  overflow-anchor: none;
 }
 
 /* The four corner words. Technical face, small, tracked; the underline is
@@ -713,19 +651,6 @@ html:has([data-tone="light"]) body {
   }
 }
 
-/* The opening reel's frame: 4:5 on every screen — the reel is portrait
-   work — as tall as the screen allows with room for the corners and the
-   caption. On a wide screen the name runs out past both its sides. */
-.reel-frame {
-  width: min(100vw - 2.5rem, (100svh - 13rem) * 0.8);
-  aspect-ratio: 4 / 5;
-}
-@media (min-width: 768px) {
-  .reel-frame {
-    width: min(100vw - 5rem, (100svh - 11rem) * 0.8);
-  }
-}
-
 /* The small technical voice used for every caption and label. In the
    components layer so a utility on the same element (a larger size, a
    different tracking) wins; unlayered, this rule beat every utility and
@@ -753,22 +678,6 @@ html:has([data-tone="light"]) body {
 @media (hover: none) {
   .film-gate img {
     filter: grayscale(0) brightness(0.9);
-  }
-}
-
-/* The homepage's flight comes up out of black. A CSS animation rather than
-   a scripted one, so it runs before the script has loaded and still ends
-   visible if the script never does. */
-@keyframes flight-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.flight-in {
-  animation: flight-in 1.4s ease-out both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .flight-in {
-    animation: none;
   }
 }
 
@@ -838,23 +747,8 @@ html:has([data-tone="light"]) body {
   100% { background-position: 0 0; }
 }
 
-/* The homepage tunnel's room (WorkTunnel): the names drifting behind it,
-   two light leaks breathing at its edges, and its own grain — heavier than
-   the site's skin, stepped like the darkroom's. */
-@keyframes tunnel-drift {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-@keyframes leak-a {
-  0% { transform: translate(0, 0) scale(1); opacity: 0.35; }
-  50% { opacity: 0.6; }
-  100% { transform: translate(8vw, 6vh) scale(1.2); opacity: 0.25; }
-}
-@keyframes leak-b {
-  0% { transform: translate(0, 0) scale(1.1); opacity: 0.2; }
-  60% { opacity: 0.45; }
-  100% { transform: translate(-10vw, -5vh) scale(0.9); opacity: 0.3; }
-}
+/* The folio's own grain (FolioFlow), heavier than the site's skin,
+   stepped like the darkroom's. */
 .tunnel-grain {
   opacity: 0.09;
   background-size: 140px 140px;

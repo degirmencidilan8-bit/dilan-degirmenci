@@ -106,21 +106,27 @@ export function Corners() {
           </Link>
         );
       })}
-      {home ? null : (
-        <Link
-          href="/"
-          aria-label="Dilan & Batuhan — home"
-          className="display fixed left-1/2 top-3 z-50 -translate-x-1/2 whitespace-nowrap text-[1.25rem] leading-none md:top-5 md:text-[1.6rem]"
-          style={{
-            color: fg,
-            ["--dw" as string]: "62",
-            ["--dg" as string]: "900",
-            ["--dt" as string]: "-0.01em",
-          }}
-        >
-          DILAN<Amp />BATUHAN
-        </Link>
-      )}
+      {/* The name, small, top centre, the way back to the opening. On the
+          homepage it is there too but hidden: the large name over the
+          opening shrinks into its place on the way down, and it is shown
+          as that arrives (FolioFlow). */}
+      <Link
+        key={home ? "home" : "page"}
+        href="/"
+        aria-label="Dilan & Batuhan — home"
+        data-corner-name
+        tabIndex={home ? -1 : undefined}
+        className="display fixed left-1/2 top-3 z-50 -translate-x-1/2 whitespace-nowrap text-[1.25rem] leading-none md:top-5 md:text-[1.6rem]"
+        style={{
+          color: fg,
+          ["--dw" as string]: "62",
+          ["--dg" as string]: "900",
+          ["--dt" as string]: "-0.01em",
+          ...(home ? { opacity: 0, pointerEvents: "none" as const } : null),
+        }}
+      >
+        DILAN<Amp />BATUHAN
+      </Link>
     </nav>
   );
 }

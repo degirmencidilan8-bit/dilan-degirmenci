@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import type { Chapter } from "@/components/BrandTunnel";
 import { LightCurtain } from "@/components/LightCurtain";
 import { BONE, INK } from "@/data/palette";
+import { EXPLORE, INTRO_DONE, introPlaying } from "@/lib/intro";
 
 // The work after the opening as a folio (Batu, 2026-11-06, from the
 // "Folio depth" study ChatGPT drew for them): the brands' pictures as
@@ -20,9 +21,8 @@ import { BONE, INK } from "@/data/palette";
 // hairline edge, its number and name small along the bottom.
 //
 // Plain page elements moved by transform, no 3D scene: nothing to build,
-// nothing sent to the graphics card but the pictures themselves. The same
-// brands, order and films as the tunnel (page.tsx's TUNNEL); BrandTunnel
-// is kept, and page.tsx chooses between the two.
+// nothing sent to the graphics card but the pictures themselves. The
+// brands, their order and their films are page.tsx's TUNNEL list.
 
 /** Scroll per brand, in screen heights. */
 const PER = 0.8;
@@ -45,6 +45,18 @@ function place(r: number, phone: boolean): Look {
   // On its way out it drops more than it slides, and is gone by the time
   // it would reach the name on the right.
   return { x: 38 - r * 42, y: 50 - r * 58, scale: 1 - r * 0.35, alpha: Math.max(0, Math.min(1, 1 + r * 1.5)) };
+}
+
+/** One brand in the folio: its name, what was done, its page, its
+ * picture, a film to play in its place, and a few more pictures. */
+export interface Chapter {
+  title: string;
+  sub: string;
+  href: string;
+  hero: string;
+  /** A film to play in place of the hero picture. */
+  video?: string;
+  sats: string[];
 }
 
 export function FolioFlow({ chapters }: { chapters: Chapter[] }) {
@@ -126,6 +138,260 @@ export function FolioFlow({ chapters }: { chapters: Chapter[] }) {
       html.classList.remove("in-tunnel");
     };
   }, [n]);
+
+  // On the way down, the large name over the opening becomes the small one
+  // at the top centre of every page (Batu, 2026-11-07): it shrinks and
+  // rises into that place as the page comes down into the folio, and the
+  // real one (Corners, hidden on the homepage until then) takes over as it
+  // arrives. The opening's frame clips what leaves it, so what moves is a
+  // copy of the name, fixed to the screen; the name itself is hidden while
+  // the copy is out. Moved by transform alone, from the scroll, so it costs
+  // nothing between frames. On a phone the name, three lines tall, would
+  // only distort into a one-line mark, so there it simply fades into it.
+  useEffect(() => {
+    const el = section.current;
+    const name = document.querySelector<HTMLElement>(".cards-intro-names");
+    const small = document.querySelector<HTMLElement>("[data-corner-name]");
+    if (!el || !name || !small) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const clamp = (v: number) => Math.min(1, Math.max(0, v));
+    const smooth = (a: number, b: number, v: number) => {
+      const t = clamp((v - a) / (b - a));
+      return t * t * (3 - 2 * t);
+    };
+
+    // The copy: the name's own markup, fixed, off until the page moves.
+    const holder = document.createElement("div");
+    holder.setAttribute("aria-hidden", "true");
+    Object.assign(holder.style, {
+      position: "fixed",
+      left: "0",
+      top: "0",
+      zIndex: "45",
+      pointerEvents: "none",
+      transformOrigin: "0 0",
+      visibility: "hidden",
+      color: getComputedStyle(name).color,
+      willChange: "transform, opacity",
+    });
+    const copy = name.cloneNode(true) as HTMLElement;
+    copy.removeAttribute("aria-label");
+    holder.appendChild(copy);
+    document.body.appendChild(holder);
+
+    // Where the name sits on the page (not the screen), and where its
+    // letters are within it — measured with nothing moved.
+    let box = { left: 0, top: 0, width: 0, height: 0 };
+    let ink = { x: 0, y: 0, width: 0 };
+    const measure = () => {
+      const r = name.getBoundingClientRect();
+      const a = name.querySelector(".cards-intro-dilan")?.getBoundingClientRect() ?? r;
+      const b = name.querySelector(".cards-intro-batuhan")?.getBoundingClientRect() ?? r;
+      // Where it stands on the screen with the page at the top.
+      box = { left: r.left, top: r.top + window.scrollY, width: r.width, height: r.height };
+      ink = { x: (a.left + b.right) / 2 - r.left, y: r.height / 2, width: b.right - a.left };
+      holder.style.width = `${r.width}px`;
+      holder.style.height = `${r.height}px`;
+    };
+
+    const update = () => {
+      if (introPlaying()) return;
+      const p = clamp(window.scrollY / Math.max(1, el.offsetTop));
+      const phone = window.innerWidth < 768;
+      // The copy is in the small name's place and size by LAND of the way
+      // down; there the real one takes over at once, the two the same, so
+      // they are never seen as two. (Crossfading while the copy was still
+      // larger showed a double name.)
+      const LAND = 0.88;
+      const handover = smooth(LAND, LAND + 0.05, p);
+      small.style.opacity = p > 0 ? handover.toFixed(3) : "0";
+      small.style.pointerEvents = handover > 0.5 ? "auto" : "none";
+      small.tabIndex = handover > 0.5 ? 0 : -1;
+      if (p <= 0 || phone || still) {
+        holder.style.visibility = "hidden";
+        name.style.opacity = phone && p > 0 ? (1 - smooth(0, 0.6, p)).toFixed(3) : "";
+        return;
+      }
+      // From where the name stood on the screen to the small name's place
+      // and size, straight, on the page's own descent. (Following the
+      // name up with the page first carried it off the top of the screen
+      // and back down.)
+      // The scale moves by equal ratios, not equal steps, so the name
+      // shrinks evenly to the eye rather than slowly and then all at once.
+      const q = clamp(p / LAND);
+      const t = small.getBoundingClientRect();
+      const s = Math.pow(t.width / ink.width, q);
+      const fromX = box.left + ink.x;
+      const fromY = box.top + ink.y;
+      const toX = t.left + t.width / 2;
+      const toY = t.top + t.height / 2;
+      const x = fromX + (toX - fromX) * q;
+      const y = fromY + (toY - fromY) * q;
+      holder.style.transform = `translate3d(${(x - s * ink.x).toFixed(2)}px, ${(y - s * ink.y).toFixed(2)}px, 0) scale(${s.toFixed(4)})`;
+      holder.style.opacity = (1 - handover).toFixed(3);
+      holder.style.visibility = "visible";
+      name.style.opacity = "0";
+    };
+
+    measure();
+    update();
+    const onResize = () => {
+      const was = name.style.opacity;
+      name.style.opacity = "";
+      measure();
+      name.style.opacity = was;
+      update();
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", onResize);
+    window.addEventListener(INTRO_DONE, onResize);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener(INTRO_DONE, onResize);
+      holder.remove();
+      name.style.opacity = "";
+      small.style.opacity = "";
+      small.style.pointerEvents = "";
+    };
+  }, []);
+
+  // The run to the work (Batu, 2026-11-07). The folio cannot be scrolled:
+  // the visitor's first move down from the opening — a wheel, a swipe, a
+  // key, or Explore Work — sets it going, and from then on it plays by
+  // itself. The page goes slowly down into the folio and comes in to land
+  // on the first brand softly, the last stretch drawn out; a breath there;
+  // then the work begins to pass, setting off gently, quickest in the
+  // middle, easing to a stop on the last brand; and the page goes on to
+  // Work. While it plays the page's own scrolling is held. Every time the
+  // homepage is come to it starts again from the top.
+  //
+  // Next mounts the page's effects, takes them down and puts them up again
+  // as it settles, so the run under way is kept in a ref and picks up in
+  // step if that happens mid-way.
+  const router = useRouter();
+  const go = useRef(router);
+  useEffect(() => {
+    go.current = router;
+  }, [router]);
+  const running = useRef<{ from: number; top: number; end: number; t0: number; run: number } | null>(null);
+  useEffect(() => {
+    const el = section.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const DOWN_MS = 3200; // down from the opening into the folio
+    // The first brand, at rest, before the work moves (Batu, 2026-11-07).
+    // The landing's last slow stretch adds a little to it.
+    const BREATH_MS = 100;
+    const RUN_MS = 8500; // the work passing, first brand to last (Batu, 2026-11-07)
+    const HOLD_MS = 450; // on the last brand, before Work
+    // Smootherstep: no speed at either end, the most in the middle.
+    const curve = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
+    // The way down: the same, with its time bent so the landing is drawn
+    // out — most of the distance early, the last of it slow.
+    const land = (t: number) => curve(1 - Math.pow(1 - t, 1.4));
+    const clamp = (v: number) => Math.min(1, Math.max(0, v));
+
+    // Always from the top: the browser does not put the scroll back.
+    const restore = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+    if (!running.current && window.scrollY > 0) window.scrollTo({ top: 0, behavior: "instant" });
+
+    let stopped = false;
+    let raf = 0;
+    let timer = 0;
+    let queued = false;
+
+    const step = (now: number) => {
+      const p = running.current;
+      if (stopped || !p) return;
+      const e = now - p.t0;
+      let y: number;
+      if (e < DOWN_MS) y = p.from + (p.top - p.from) * land(clamp(e / DOWN_MS));
+      else if (e < DOWN_MS + BREATH_MS) y = p.top;
+      else y = p.top + (p.end - p.top) * curve(clamp((e - DOWN_MS - BREATH_MS) / p.run));
+      // "instant": the page is smooth-scrolled in globals.css, and every
+      // frame of this would otherwise start a smooth scroll of its own.
+      window.scrollTo({ top: y, behavior: "instant" });
+      if (e >= DOWN_MS + BREATH_MS + p.run) {
+        timer = window.setTimeout(() => {
+          running.current = null;
+          go.current.push("/work");
+        }, HOLD_MS);
+        return;
+      }
+      raf = requestAnimationFrame(step);
+    };
+    const start = () => {
+      if (running.current || stopped) return;
+      if (introPlaying()) {
+        queued = true;
+        return;
+      }
+      const top = el.offsetTop;
+      const end = el.offsetTop + el.offsetHeight - window.innerHeight;
+      const run = RUN_MS;
+      running.current = { from: window.scrollY, top, end, t0: performance.now(), run };
+      // Explore Work goes in a flash as the page sets off (globals.css).
+      document.querySelector(".cards-intro-more")?.classList.add("is-flash");
+      raf = requestAnimationFrame(step);
+    };
+    const onIntroDone = () => {
+      if (queued) start();
+    };
+
+    // The page's own scrolling, held: a move down starts the run, and
+    // nothing moves the page by hand while it plays.
+    const hold = (e: Event) => {
+      if (e.cancelable) e.preventDefault();
+    };
+    const onWheel = (e: WheelEvent) => {
+      hold(e);
+      if (e.deltaY > 0) start();
+    };
+    let touchY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      hold(e);
+      if (touchY - (e.touches[0]?.clientY ?? touchY) > 8) start();
+    };
+    const KEYS = ["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "End", "Home"];
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      if (!KEYS.includes(e.key)) return;
+      hold(e);
+      if (["ArrowDown", "PageDown", " ", "End"].includes(e.key)) start();
+    };
+    // Explore Work, under the names, asks for the run (see CardOpening).
+    const onExplore = (e: Event) => {
+      e.preventDefault();
+      start();
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("keydown", onKey);
+    window.addEventListener(EXPLORE, onExplore);
+    window.addEventListener(INTRO_DONE, onIntroDone);
+    // Taken down mid-run (Next settling the page): carry on in step.
+    if (running.current) raf = requestAnimationFrame(step);
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+      window.clearTimeout(timer);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(EXPLORE, onExplore);
+      window.removeEventListener(INTRO_DONE, onIntroDone);
+      history.scrollRestoration = restore;
+    };
+  }, []);
 
   const c = chapters[active];
   const pad = (k: number) => String(k).padStart(2, "0");

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Amp } from "@/components/Corners";
 import imageLoader from "@/lib/image-loader";
-import { TUNNEL_UP, endIntro, isTunnelUp, markHydrated, pageHydrated } from "@/lib/intro";
+import { EXPLORE, endIntro, markHydrated, pageHydrated } from "@/lib/intro";
 import { irisBlades } from "@/lib/iris";
 import { BONE } from "@/data/palette";
 
@@ -16,7 +16,7 @@ import { BONE } from "@/data/palette";
 // crosses them on the About page. Then the two cards come towards each
 // other, fading as they do, and are gone before they touch; light comes
 // up in the gap between them, and each name comes in from where its card
-// was: DİLAN & BATUHAN, a great deal of dark, and under them "Explore Work"
+// was: DILAN & BATUHAN, a great deal of dark, and under them "Explore Work"
 // and an arrow down into the tunnel. No frame lines.
 //
 // Once a session; skipped at once under reduced motion, or with the
@@ -28,8 +28,6 @@ import { BONE } from "@/data/palette";
 // sequence on the page as a stylesheet of its own if this is the first
 // visit of the session; while it plays the values are written inline,
 // frame by frame, as custom properties on the section.
-//
-// The openings before it are TwoLooks and Opener; page.tsx chooses.
 
 const KEY = "db-intro-cards";
 const CARDS = {
@@ -94,9 +92,7 @@ function Card({ side, src }: { side: "a" | "b"; src: string }) {
   );
 }
 
-/** `waitForTunnel`: the homepage tunnel follows, and the cards wait for its
- * 3D scene to be made before they move (see BrandTunnel). */
-export function CardOpening({ waitForTunnel = false }: { waitForTunnel?: boolean }) {
+export function CardOpening() {
   const section = useRef<HTMLElement>(null);
   // The page as the server sent it (and its first render in the browser),
   // not the homepage put together again on coming back to it.
@@ -123,12 +119,9 @@ export function CardOpening({ waitForTunnel = false }: { waitForTunnel?: boolean
       return;
     }
 
-    // The clock starts once the tunnel's 3D scene is up (made while the
-    // screen is still dark; see BrandTunnel), or after a second regardless.
     let t0 = 0;
     let raf = 0;
     let done = false;
-    let wait = 0;
     const set = (k: string, v: number) => el.style.setProperty(k, v.toFixed(3));
 
     const stop = () => {
@@ -169,23 +162,12 @@ export function CardOpening({ waitForTunnel = false }: { waitForTunnel?: boolean
       }
       raf = requestAnimationFrame(tick);
     };
-    const go = () => {
-      window.removeEventListener(TUNNEL_UP, go);
-      window.clearTimeout(wait);
-      if (!done && !raf) raf = requestAnimationFrame(tick);
-    };
-    if (!waitForTunnel || isTunnelUp()) go();
-    else {
-      window.addEventListener(TUNNEL_UP, go);
-      wait = window.setTimeout(go, 1000);
-    }
+    raf = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(raf);
       raf = 0;
-      window.removeEventListener(TUNNEL_UP, go);
-      window.clearTimeout(wait);
     };
-  }, [waitForTunnel]);
+  }, []);
 
   return (
     <>
@@ -205,9 +187,9 @@ export function CardOpening({ waitForTunnel = false }: { waitForTunnel?: boolean
             className="cards-intro-names display"
             style={{ ["--dw" as string]: "62", ["--dg" as string]: "900", ["--dt" as string]: "-0.02em" }}
           >
-            {/* The Turkish capital, with its dot (Batu, 2026-11-06). */}
+            {/* Without the dot: it matches the small name it becomes (Batu, 2026-11-07). */}
             <span aria-hidden className="cards-intro-dilan">
-              DİLAN
+              DILAN
             </span>
             <span aria-hidden className="cards-intro-amp">
               <Amp />
@@ -222,6 +204,8 @@ export function CardOpening({ waitForTunnel = false }: { waitForTunnel?: boolean
           <button
             type="button"
             onClick={() => {
+              // The folio, if it follows, takes it from here (lib/intro EXPLORE).
+              if (!window.dispatchEvent(new Event(EXPLORE, { cancelable: true }))) return;
               const stop = document.querySelector<HTMLElement>("[data-explore-target]");
               const top = stop ? stop.getBoundingClientRect().top + window.scrollY : window.innerHeight;
               const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

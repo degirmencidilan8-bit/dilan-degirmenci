@@ -16,8 +16,8 @@ import { BONE } from "@/data/palette";
 // own rotation and each picture's opacity change. Pictures on the far side
 // fall back to almost nothing and cannot be clicked.
 //
-// Look at a picture and it cuts through its own set, the way the field
-// below the opener used to (see Field); its name comes up under the globe.
+// Look at a picture and it cuts through its own set; its name comes up
+// under the globe.
 
 const CUT_MS = 700;
 /** Degrees turned over the whole scroll of the section. */

@@ -2,8 +2,8 @@
 // over — so heavy work (the tunnel's 3D scene, its pictures going up to the
 // graphics card) waits until it is, rather than stalling the sequence.
 //
-// The openings (CardOpening, TwoLooks) mark the stylesheet that holds the
-// start of their sequence with data-intro, and take it off when they end.
+// The opening (CardOpening) marks the stylesheet that holds the start of
+// its sequence with data-intro, and takes it off when it ends.
 
 export const INTRO_DONE = "db:intro-done";
 
@@ -23,18 +23,10 @@ export function markHydrated() {
   hydrated = true;
 }
 
-// The homepage tunnel's 3D scene is up (its WebGL context made). The
-// opening waits for it before it starts to move, since making it holds the
-// page for a moment (see BrandTunnel).
-export const TUNNEL_UP = "db:tunnel-up";
-let tunnelUp = false;
-export function isTunnelUp() {
-  return tunnelUp;
-}
-export function markTunnelUp() {
-  tunnelUp = true;
-  window.dispatchEvent(new Event(TUNNEL_UP));
-}
+/** Explore Work, under the names, asks for the way down. Whatever follows
+ * the opening may take it (the folio starts its run and cancels the event);
+ * if nothing does, the button scrolls down itself. */
+export const EXPLORE = "db:explore";
 
 /** The sequence is over: take its start off the page and say so. */
 export function endIntro(start: Element) {

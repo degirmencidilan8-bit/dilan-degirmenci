@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 // The index: films and photography as one wall of cards on the dark
 // ground, opened by an aperture, with a globe as the other view. See
-// WorkIndex. (Before it: a light page of greyscale 16:9 frames, WorkGrid.)
+// WorkIndex.
 export default function WorkPage() {
   const field = getField().filter((s) => s.href);
   // Each card carries its project's whole set, to cut through on a look.
